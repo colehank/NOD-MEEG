@@ -165,11 +165,10 @@ def concat_epo(epo_list):
 
 
 class EEGPreprocessing:
-    def __init__(self, subject, task, session, run, bids_dir):
+    def __init__(self, bids_path):
         self.process_info = {}
         self.extra_info   = {}
-
-        self.bids_path = BIDSPath(subject=subject, task=task, root=bids_dir, session=session, run=run)
+        self.bids_path = bids_path
         self.raw = read_raw_bids(self.bids_path)
         self.raw.load_data()
         self.rename_dict = {'FP1': 'Fp1', 'FP2': 'Fp2', 'FPZ': 'Fpz',
