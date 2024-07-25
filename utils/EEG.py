@@ -45,7 +45,6 @@ plt.rcParams['figure.max_open_warning'] = 60
 mne.use_log_level(verbose='ERROR')
 mne.cuda.init_cuda(verbose=True)
 
-missing_subs = ['15', '19', '20', '23']
 
 #%%
 def tasks():
@@ -74,6 +73,11 @@ def get_run_dict():
     run_d['18']['01'] = ['03','04','05','06','07','08']
     del run_d['28']['01'][-1]
     return run_d
+
+
+def get_subs():
+    return ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', 
+            '11', '12', '13', '14', '21', '24', '26', '27', '29', '30']
 
 
 def events_plot(raw):
@@ -139,10 +143,12 @@ def update_annot(raw):
         
         pprint(new_event_id)
     id_to_desc  = {v: k for k, v in new_event_id.items()}
-    new_annot = mne.Annotations(onset       = raw.times[ev[:,0]],
-                                duration    = 0.005,
-                                description = np.array([id_to_desc[code] for code in ev[:, 2]]),
-                                orig_time   = raw.info['meas_date'])
+    onsets = raw.times[ev[:, 0]]
+    durations = np.repeat(1 / raw.info['sfreq'], len(onsets))
+    descriptions = np.array([id_to_desc[code] for code in ev[:, 2]])
+
+    new_annot = mne.Annotations(onset=onsets, duration=durations, 
+                                description=descriptions, orig_time=raw.info['meas_date'])
     modified_raw = raw.copy()
     modified_raw.set_annotations(new_annot)
     
@@ -171,14 +177,14 @@ class EEGPreprocessing:
         self.bids_path = bids_path
         self.raw = read_raw_bids(self.bids_path)
         self.raw.load_data()
-        self.rename_dict = {'FP1': 'Fp1', 'FP2': 'Fp2', 'FPZ': 'Fpz',
-                            'FZ': 'Fz', 'FCZ': 'FCz', 'CZ': 'Cz',
-                            'CPZ': 'CPz', 'PZ': 'Pz', 'POZ': 'POz', 'OZ': 'Oz'}
-        self.montage = mne.channels.make_standard_montage('standard_1005')
+        # self.rename_dict = {'FP1': 'Fp1', 'FP2': 'Fp2', 'FPZ': 'Fpz',
+        #                     'FZ': 'Fz', 'FCZ': 'FCz', 'CZ': 'Cz',
+        #                     'CPZ': 'CPz', 'PZ': 'Pz', 'POZ': 'POz', 'OZ': 'Oz'}
+        # self.montage = mne.channels.make_standard_montage('standard_1005')
         
-        if 'NaN' in self.raw.annotations.description:
-            self.raw.annotations.delete(np.where(self.raw.annotations.description == 'NaN'))
-        self.raw = update_annot(self.raw)
+        # if 'NaN' in self.raw.annotations.description:
+        #     self.raw.annotations.delete(np.where(self.raw.annotations.description == 'NaN'))
+        # self.raw = update_annot(self.raw)
         if np.sum(self.raw.annotations.description == 'stim_on') != 125:
             # raise ValueError(f'events unmatched--{op.basename(self.raw.filenames[0])}: {np.sum(self.raw.annotations.description == "stim_on")}')
             warnings.warn(f'events unmatched--{op.basename(self.raw.filenames[0])}: {np.sum(self.raw.annotations.description == "stim_on")}')
@@ -187,23 +193,23 @@ class EEGPreprocessing:
         
         logging.info(f'preprocessing - {self.process_info["runinfo"]}')
         
-    def apply_montage(self, plot=False):
-        self.raw.set_channel_types({"HEO": "eog", "VEO": "eog"})
-        self.raw.rename_channels(self.rename_dict)
-        if 'CB1' in self.raw.ch_names:
-            self.raw.drop_channels(['CB1', 'CB2']) 
-        if 'EKG' in self.raw.ch_names:
-            self.raw.set_channel_types({"EKG": "bio"})
-        if 'EMG' in self.raw.ch_names:
-            self.raw.set_channel_types({"EMG": "emg"})
+    # def apply_montage(self, plot=False):
+    #     self.raw.set_channel_types({"HEO": "eog", "VEO": "eog"})
+    #     self.raw.rename_channels(self.rename_dict)
+    #     if 'CB1' in self.raw.ch_names:
+    #         self.raw.drop_channels(['CB1', 'CB2']) 
+    #     if 'EKG' in self.raw.ch_names:
+    #         self.raw.set_channel_types({"EKG": "bio"})
+    #     if 'EMG' in self.raw.ch_names:
+    #         self.raw.set_channel_types({"EMG": "emg"})
             
-        self.raw.set_montage(self.montage)
-        if plot:
-            self.raw.plot_sensors(sphere=(0, 0.02, 0, 0.09))
+    #     self.raw.set_montage(self.montage)
+    #     if plot:
+    #         self.raw.plot_sensors(sphere=(0, 0.02, 0, 0.09))
         
-        self.extra_info['montage'] = 'standard_1005'
-        self.process_info['montage'] = 'DONE'
-        # pprint(self.process_info)
+    #     self.extra_info['montage'] = 'standard_1005'
+    #     self.process_info['montage'] = 'DONE'
+    #     # pprint(self.process_info)
 
         
         
@@ -218,6 +224,7 @@ class EEGPreprocessing:
         raw_nd.info['bads'].extend(bads)
         if is_interpolate:
             raw_nd.interpolate_bads(reset_bads=True)
+            
         
         self.raw = raw_nd
         self.process_info['bad channels fixing'] = 'DONE'
@@ -239,6 +246,15 @@ class EEGPreprocessing:
         self.extra_info['zapline denoise'] = f'fline - {fline}'
         # pprint(self.process_info)
 
+    def robust_reference(self):
+        raw = self.raw.copy()
+        params = {
+            'ref_chs': 'eeg',
+            'reref_chs': 'eeg',
+        }
+        reference = Reference(raw, params, ransac=True)
+        reference.perform_reference()
+        self.raw = reference.raw
                 
     def rereference(self, ref='average'):
         refraw = self.raw.copy()
@@ -384,7 +400,7 @@ class EEGPreprocessing:
         
         Out put: mne.raw
         """
-        self.apply_montage()
+        # self.apply_montage()
         self.zapline_denoise()
         self.find_bad_channels()
         
