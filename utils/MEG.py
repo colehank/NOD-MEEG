@@ -4,9 +4,10 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', date
 
 import mne
 from mne_bids import read_raw_bids
-from pyprep.find_noisy_channels import NoisyChannels
 from mne_icalabel import label_components
 from scipy.io import loadmat
+
+mne.use_log_level(verbose='ERROR')
 #%%
 def maxwell_filter(raw,ref_head):
     raw_sss = mne.preprocessing.maxwell_filter(raw, 
@@ -52,7 +53,7 @@ class MEGPreprocessing:
             origin=(0,0,0.04),
             cross_talk=None, 
             calibration=None,
-            verbose=True)
+            )
         
         if not auto_noisy_chs and not auto_flat_chs:
             self.extra_info['bad_chs'] = 'None'
