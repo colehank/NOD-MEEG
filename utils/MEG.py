@@ -3,17 +3,30 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt = '%m%d-%H:%M')
 
 import mne
+from mne_bids import read_raw_bids
 from pyprep.find_noisy_channels import NoisyChannels
 from mne_icalabel import label_components
 from scipy.io import loadmat
-
 #%%
+def maxwell_filter(raw,ref_head):
+    raw_sss = mne.preprocessing.maxwell_filter(raw, 
+                                               origin=(0., 0., 0.04),
+                                               coord_frame='head',
+                                               destination=ref_head,
+                                               )
+    return raw_sss
+
+def baseline_correction(epochs):
+    baselined_epochs = mne.baseline.rescale(data=epochs.get_data(),times=epochs.times,baseline=(None,0),mode='zscore',copy=False)
+    epochs = mne.EpochsArray(baselined_epochs, epochs.info, epochs.events, epochs.tmin,event_id=epochs.event_id, metadata=epochs.metadata)
+    return epochs
+
 class MEGPreprocessing:
-    def __init__(self, subject, task, session, run, bids_dir):
+    def __init__(self, bids_path):
+        self.bids_path = bids_path
         self.process_info = {}
         self.extra_info   = {}
 
-        self.bids_path = BIDSPath(subject=subject, task=task, root=bids_dir, session=session, run=run)
         self.raw = read_raw_bids(self.bids_path)
         self.raw.load_data()
         self.process_info['runinfo'] = self.bids_path.basename
@@ -22,62 +35,49 @@ class MEGPreprocessing:
         logging.info(f'preprocessing - {self.process_info["runinfo"]}')
         
 
-     
-    def find_bad_channels(self, is_interpolate=True):
-        raw_nd = self.raw.copy()
-        nd = NoisyChannels(raw_nd, random_state=1337)
-        nd.find_bad_by_correlation()
-        nd.find_bad_by_deviation()
-        nd.find_bad_by_ransac()
+    def de_linenoise(self, fline = 50):
+        raw = self.raw.copy()
+        freqs = np.arange(50, 251, 50)
+        #TODO: zapline denoise
         
-        bads = nd.get_bads()
-        raw_nd.info['bads'].extend(bads)
-        if is_interpolate:
-            raw_nd.interpolate_bads(reset_bads=True)
-        
-        self.raw = raw_nd
-        self.process_info['bad channels fixing'] = 'DONE'
-        self.extra_info['bad channels fixing'] = nd.get_bads(as_dict=True)
-        # pprint(self.process_info)
-        
+    def fix_bad_channels(self, is_interpolate=True):
 
-    def zapline_denoise(self, fline = 50):
-        data = self.raw.get_data().T
-        data = np.expand_dims(data, axis=2)  # 现在形状为 (nsample, nchan, ntrial(1))
-        sfreq = self.raw.info['sfreq']
-        with contextlib.redirect_stdout(io.StringIO()): # mute for simplicity
-            out, _ = dss.dss_line_iter(data, fline, sfreq, nfft=400)
-            cleaned_raw = mne.io.RawArray(out.T.squeeze(), self.raw.info)
-            cleaned_raw.set_annotations(self.raw.annotations)
-        
-        self.raw = cleaned_raw 
-        self.process_info['zapline denoise'] = 'DONE'
-        self.extra_info['zapline denoise'] = f'fline - {fline}'
-        # pprint(self.process_info)
-
-                
-    def rereference(self, ref='average'):
-        refraw = self.raw.copy()
-        refraw.set_eeg_reference(ref)
-        self.raw = refraw
-        
-        if 're_reference bef ICA' in self.process_info:
-            self.process_info['re_reference aft ICA'] = 'DONE'
-            self.extra_info['re_reference aft ICA'] = ref
+        raw = self.raw.copy() 
+        if raw.compensation_grade != 0:
+            raw.apply_gradient_compensation(0)
             
-        self.process_info['re_reference bef ICA'] = 'DONE'
-        self.extra_info['re_reference bef ICA'] = ref
-        # pprint(self.process_info)        
-    
+        auto_noisy_chs, auto_flat_chs, auto_scores = mne.preprocessing.find_bad_channels_maxwell(
+            raw=raw, 
+            return_scores=True, 
+            origin=(0,0,0.04),
+            cross_talk=None, 
+            calibration=None,
+            verbose=True)
+        
+        if not auto_noisy_chs and not auto_flat_chs:
+            self.extra_info['bad_chs'] = 'None'
+        else:
+            self.extra_info['bad_chs'] = {'noisy': auto_noisy_chs, 'flat': auto_flat_chs, 'scores': auto_scores}
+            self.extra_info['N_bad_chs'] = len(auto_noisy_chs+auto_flat_chs)
+            
+            raw.info['bads'].extend(auto_noisy_chs+auto_flat_chs)
+            raw.interpolate_bads()
+            raw.apply_gradient_compensation(3)
+            self.raw = raw
+            
+        self.process_info['bad channels'] = 'DONE'
+        del raw
+        
+
     def ica_automark(self, save = True, ica_dir=None):
         
         
-        raw_resmpl = self.raw.copy().pick_types(eeg=True).load_data()
+        raw_resmpl = self.raw.copy().pick_types(meg=True).load_data()
         raw_resmpl.resample(200)
-        raw_resmpl.filter(1, 40)
+        raw_resmpl.filter(1, 40) # 1Hz以下低频飘逸将很大影响ICA的效果
         
 
-        ica = mne.preprocessing.ICA(method='fastica',random_state=97,n_components=40)
+        ica = mne.preprocessing.ICA(method='infomax',random_state=97)
         ica.fit(raw_resmpl)
         
         ic_labels = label_components(raw_resmpl, ica, method="iclabel")
@@ -187,31 +187,112 @@ class MEGPreprocessing:
         # pprint(self.process_info)
         
     
-    def mypipeline(self,ica_dir,exclude):
+    def mypipeline(self,ica_dir):
         """
         Input: mne.raw
         
-        1. set montage 1005
-        2. bad channel detection (pyprep)
-        3. denoise-line noise
-        4. denoise-ASR
+        1. bad channel fixing (maxwell)
+        2. denoise-line noise
+        2.1 denoise-3 gradient compensation
         4. ICA
-        5. re-referencing
         
         Out put: mne.raw
         """
-        self.apply_montage()
-        self.zapline_denoise()
-        self.find_bad_channels()
-        
-        self.rereference()#like eeglab, re-reference before ICA
+        self.fix_bad_channels()
         self.ica_automark(ica_dir=ica_dir)
-        self.ica_plot(ica_dir=ica_dir)
-        self.ica_reconst(exclude=exclude)
-        self.rereference() #re-reference after ICA also
+        # self.ica_plot(ica_dir=ica_dir)
+        self.ica_reconst(exclude=None)
         
         annot = self.raw.annotations
         sum_annot = {an: int(np.sum(annot.description == an)) for an in np.unique(annot.description)}
         self.extra_info['annot'] = sum_annot
                 
         return self.raw
+
+class MEGEpoching:
+    def __init__(self, sub, rawroot, behavdir, metadata_path):
+        self.process_info = {}
+        self.extra_info   = {}
+        self.rawps = sorted([f'{rawroot}/{file}' for file in os.listdir(rawroot) if file.startswith(f'sub-{sub}') and file.endswith('.fif')])
+        self.bhvps = sorted([f'{behavdir}/{op.basename(file).split(".")[0]}_meg.mat' for file in self.rawps])
+        self.stim_info = pd.read_csv(metadata_path)
+        self.basicinfo = {'sub': sub}
+        
+        self.process_info['runsinfo']   = f'{sub} - {len(self.rawps)} runs'
+        logging.info(f'epoching - sub{sub}')
+        
+    def load_data(self):
+        self.raws = [mne.io.read_raw_fif(raw) for raw in self.rawps]
+        self.bhvs = [loadmat(bhv) for bhv in self.bhvps]
+        self.dev_head_t = raws[0].info['dev_head_t']
+        
+        # make raws alignable for concatenation
+        for raw in self.raws:
+             raw = maxwell_filter(raw,ref_head = self.dev_head_t)
+            
+    def epoching(self,epoch_window=(-0.1,0,8)):
+        sub_epo = []
+        for i, (raw,bhv) in enumerate(zip(self.raws, self.bhvs)):
+            events, event_id = mne.events_from_annotations(raw)
+            
+            imgTrial = [bhv['runStim'][i][0][0].split('.')[0] for i in range(bhv['runStim'].size)]
+            subTrial = []
+            
+            for img in imgTrial:
+                sub_class = stim_info[stim_info['image_id'] == img]['class'].values[0]
+                subTrial.append(sub_class)
+                    
+            supTrial = [stim_info[stim_info['image_id'] == i]['super_class'].values[0] for i in imgTrial]
+            ani_resp = np.array(['True' if i == 1 else 'False' for i in bhv['trial'][:,4]])
+            ani_labe = np.array(['True' if i == 1 else 'False' for i in bhv['animate_label'][0]])
+            judge_acur = [f'{i}' for i in ani_resp == ani_labe]
+            rt       = bhv['trial'][:,-1]
+
+            metadata, new_events, new_event_id = mne.epochs.make_metadata(
+                events      = events[events[:,2] == event_id['stim_on']],
+                event_id    = {'stim_on': event_id['stim_on']},
+                tmin        = epoch_window[0],
+                tmax        = epoch_window[1],
+                sfreq       = raw.info['sfreq']
+                )
+            stim_ind        = metadata.index[metadata['event_name'] == 'stim_on'].tolist()
+            
+            fn                                          = self.rawps[i]
+            sub                                         = fn.split('/')[-1].split('_')[0][4:]
+            ses                                         = fn.split('/')[-1].split('_')[1].split('-')[1]
+            run                                         = fn.split('/')[-1].split('_')[2][4:6]
+            
+            metadata['task']                            = ['ImageNet'] * len(metadata)
+            metadata['subject']                         = [sub] * len(metadata)
+            metadata['session']                         = [f"{ses}"] * len(metadata)
+            metadata['run']                             = [run] * len(metadata)
+            metadata.loc[stim_ind, 'image_id']          = imgTrial
+            metadata.loc[stim_ind, 'class']             = subTrial
+            metadata.loc[stim_ind, 'super_class']       = supTrial
+            metadata.loc[stim_ind, 'stim_is_animate']   = ani_labe
+            metadata.loc[stim_ind, 'resp_is_animate']   = ani_resp
+            metadata.loc[stim_ind, 'resp_is_right']     = judge_acur
+            metadata.loc[stim_ind, 'RT']                = rt
+            
+            epochs = mne.Epochs(
+                        raw         = raw,
+                        events      = new_events,
+                        event_id    = new_event_id,
+                        tmin        = epoch_window[0],
+                        tmax        = epoch_window[1],
+                        metadata    = metadata,
+                        # baseline    = (None, 0),
+                        picks       = 'meg'
+                        )
+            epochs_corrected = baseline_correction(epochs)
+            sub_epo.append(epochs_corrected)
+
+        self.epoched = mne.concatenate_epochs(epochs_list=sub_epo, add_offset=True)
+        self.process_info[sub] = 'DONE'
+        self.sub_metadata = metadata
+        
+    def mypipeline(self):
+        self.load_data()
+        self.epoching()
+        return self.epoched, self.sub_metadata
+    

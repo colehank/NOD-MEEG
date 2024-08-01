@@ -11,9 +11,11 @@ from scipy.io import loadmat
 import re
 from datetime import datetime, timezone
 import shutil
+import mne_bids
+
 
 missing_subs = ['15', '17','18', '19', '20', '23', '28']
-databad_subs = ['16', '22', '25']
+databad_subs = ['16', '22', '25','21']
 bad_subs = missing_subs + databad_subs
 
 subs = [f'{sub:02d}' for sub in range(1, 31) if f'{sub:02d}' not in bad_subs]
@@ -67,7 +69,8 @@ def bidsupdate(bids,new_root):
     
     del raw,init_raw
     
-    
+
+#%%
 
 task = 'ImageNet'
 
@@ -80,7 +83,9 @@ for sub in subs:
             bidsupdate(bids, new_root)
 
 
-
+mne_bids.make_dataset_description(path = new_root,name = 'NOD-EEG',dataset_type = 'raw', 
+                                  authors = 'Guohao Zhang',overwrite=True)
+print(mne_bids.make_report(new_root))
 #%% EEG behavior data
 # rawbhv = '/nfs/z1/userhome/zzl-zhangguohao/workingdir/NOD-MEEG_all/EEG/raw_EEG/behaviordata'
 # new_root = '/nfs/z1/userhome/zzl-zhangguohao/workingdir/NOD-MEEG_data/behavior/EEG'

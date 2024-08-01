@@ -1,6 +1,6 @@
 #%%
 import numexpr as ne
-ne.set_num_threads(8)
+ne.set_num_threads(64)
 
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt = '%m%d-%H:%M')
@@ -47,37 +47,9 @@ mne.cuda.init_cuda(verbose=True)
 
 
 #%%
-def tasks():
-    return ['ImageNet']
-    
-def get_sub_list():
-    return [f'{sub:02d}' for sub in range(1, 31) if f'{sub:02d}' not in missing_subs]    
-
-def get_ses_dict():
-    ses_d = {sub:[] for sub in get_sub_list()}
-    for sub in ses_d:
-        if int(sub) < 10:
-            ses_d[sub] = [f'{ses:02d}' for ses in range(1, 5)]
-        if int(sub) == 17:
-            ses_d[sub] = ['02']
-        else:
-            ses_d[sub] = ['01','02']
-    return ses_d
-
-def get_run_dict():
-    run_d = {}
-    for sub in get_sub_list():
-        run_d[sub] = {}
-        for ses in get_ses_dict()[sub]:
-            run_d[sub][ses] = [f'{run:02d}' for run in range(1, 9)]
-    run_d['18']['01'] = ['03','04','05','06','07','08']
-    del run_d['28']['01'][-1]
-    return run_d
-
-
 def get_subs():
     return ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', 
-            '11', '12', '13', '14', '21', '24', '26', '27', '29', '30']
+            '11', '12', '13', '14', '24', '26', '27', '29', '30']
 
 
 def events_plot(raw):
@@ -246,15 +218,6 @@ class EEGPreprocessing:
         self.extra_info['zapline denoise'] = f'fline - {fline}'
         # pprint(self.process_info)
 
-    def robust_reference(self):
-        raw = self.raw.copy()
-        params = {
-            'ref_chs': 'eeg',
-            'reref_chs': 'eeg',
-        }
-        reference = Reference(raw, params, ransac=True)
-        reference.perform_reference()
-        self.raw = reference.raw
                 
     def rereference(self, ref='average'):
         refraw = self.raw.copy()
@@ -277,7 +240,7 @@ class EEGPreprocessing:
         raw_resmpl.filter(1, 40)
         
 
-        ica = mne.preprocessing.ICA(method='fastica',random_state=97,n_components=40)
+        ica = mne.preprocessing.ICA(method='infomax',random_state=97)
         ica.fit(raw_resmpl)
         
         ic_labels = label_components(raw_resmpl, ica, method="iclabel")
@@ -332,8 +295,8 @@ class EEGPreprocessing:
         
         
         n_components    = raw_ica.n_components_
-        n_cols = 5
-        n_rows = 8
+        n_cols = 7
+        n_rows = 9
         plt.ioff()
         fig, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols * 6, n_rows * 6))
         for i in range(n_components):
@@ -406,7 +369,7 @@ class EEGPreprocessing:
         
         self.rereference()#like eeglab, re-reference before ICA
         self.ica_automark(ica_dir=ica_dir)
-        self.ica_plot(ica_dir=ica_dir)
+        # self.ica_plot(ica_dir=ica_dir)
         self.ica_reconst(exclude=exclude)
         self.rereference() #re-reference after ICA also
         
@@ -421,8 +384,8 @@ class EEGEpoching:
     def __init__(self, sub, rawroot, behavdir):
         self.process_info = {}
         self.extra_info   = {}
-        self.rawps = sorted([f'{rawroot}/{file}' for file in os.listdir(rawroot) if file.startswith(f'sub{sub}') and file.endswith('.fif')])
-        self.bhvps = sorted([f'{behavdir}/{op.basename(file).split(".")[0]}.mat' for file in self.rawps])
+        self.rawps = sorted([f'{rawroot}/{file}' for file in os.listdir(rawroot) if file.startswith(f'sub-{sub}') and file.endswith('.fif')])
+        self.bhvps = sorted([f'{behavdir}/{op.basename(file).split(".")[0]}_eeg.mat' for file in self.rawps])
         self.basicinfo = {'sub': sub}
         
         self.process_info['runsinfo']   = f'{sub} - {len(self.rawps)} runs'
@@ -434,24 +397,24 @@ class EEGEpoching:
     
 
 
-    def epoching(self, metadta_path, epoch_window = (-0.1, 0.8)):
-        stim_info = pd.read_csv(metadta_path, low_memory=False)
+    def epoching(self, metadata_path, epoch_window = (-0.1, 0.8)):
+        stim_info = pd.read_csv(metadata_path, low_memory=False)
         sub_epo = []
         for i, (raw, bhv) in enumerate(zip(self.raws, self.bhvs)):
-            # print(raw)
-            # print(bhv)
-            # raw = update_annot(raw)
+
             events, event_id = mne.events_from_annotations(raw)
             
             imgTrial = [bhv['runStim'][i][0][0].split('.')[0] for i in range(bhv['runStim'].size)]
             subTrial = []
+            
             for img in imgTrial:
-                sub_class = stim_info[stim_info['image_id'] == img]['sub_class'].values[0]
+                sub_class = stim_info[stim_info['image_id'] == img]['class'].values[0]
                 subTrial.append(sub_class)
+                    
             supTrial = [stim_info[stim_info['image_id'] == i]['super_class'].values[0] for i in imgTrial]
-            ani_resp = [True if i == 1 else False for i in bhv['trial'][:,4]]
-            ani_labe = [True if i == 1 else False for i in bhv['animate_label'][0]]
-            judge_acur = ani_resp == ani_labe
+            ani_resp = np.array(['True' if i == 1 else 'False' for i in bhv['trial'][:,4]])
+            ani_labe = np.array(['True' if i == 1 else 'False' for i in bhv['animate_label'][0]])
+            judge_acur = [f'{i}' for i in ani_resp == ani_labe]
             rt       = bhv['trial'][:,-1]
 
             metadata, new_events, new_event_id = mne.epochs.make_metadata(
@@ -464,16 +427,16 @@ class EEGEpoching:
             stim_ind        = metadata.index[metadata['event_name'] == 'stim_on'].tolist()
             
             fn                                          = self.rawps[i]
-            sub                                         = fn.split('/')[-1].split('_')[0][3:]
-            ses                                         = fn.split('/')[-1].split('_')[1][3:5]
-            run                                         = fn.split('/')[-1].split('_')[2][3:5]
+            sub                                         = fn.split('/')[-1].split('_')[0][4:]
+            ses                                         = fn.split('/')[-1].split('_')[1].split('-')[1]
+            run                                         = fn.split('/')[-1].split('_')[2][4:6]
             
             metadata['task']                            = ['ImageNet'] * len(metadata)
             metadata['subject']                         = [sub] * len(metadata)
-            metadata['session']                         = [f"ImageNet{ses}"] * len(metadata)
+            metadata['session']                         = [f"{ses}"] * len(metadata)
             metadata['run']                             = [run] * len(metadata)
             metadata.loc[stim_ind, 'image_id']          = imgTrial
-            metadata.loc[stim_ind, 'sub_class']         = subTrial
+            metadata.loc[stim_ind, 'class']             = subTrial
             metadata.loc[stim_ind, 'super_class']       = supTrial
             metadata.loc[stim_ind, 'stim_is_animate']   = ani_labe
             metadata.loc[stim_ind, 'resp_is_animate']   = ani_resp
