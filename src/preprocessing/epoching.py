@@ -161,4 +161,3 @@ if __name__ == '__main__':
     info = InfoExtraction(root, event_root)
     epochor = Epoching(info.sub_info(sub)['events'], info.sub_info('01')['rawps'], tmin, tmax, sfreq, lfreq, hfreq, datatype)
     epochor.run()
-#%%

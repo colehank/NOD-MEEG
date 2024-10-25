@@ -18,7 +18,7 @@ STIM_ID         = 'stim_on'
 N_STIM          = 200
 EXTENSION       = 'fif'
 DATATYPE        = 'meg'
-MEGNET_MODEL    = '../models/megnet_enigma.keras'
+MEGNET_MODEL    = '../models/megnet.keras'
 MAUNAL_ICA_PATH = f'{RAW_ROOT}/derivatives/ica/figs/Artifact_ICs.json'
 MANUALED        = op.exists(MAUNAL_ICA_PATH)
 msg.good(f'manual selection status: {MANUALED}') if MANUALED else msg.warn(f'manual selection status: {MANUALED}')
