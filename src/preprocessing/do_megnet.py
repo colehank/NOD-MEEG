@@ -14,7 +14,6 @@ from scipy.io import loadmat
 import json
 import pickle
 import scipy.stats as stats
-from tensorflow import keras
 import tensorflow as tf
 from tensorflow import keras
 from keras.models import load_model
