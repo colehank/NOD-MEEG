@@ -1,11 +1,20 @@
 #%%
 from dataclasses import dataclass
+from mne_bids import BIDSPath
+import os
 
-@dataclass
 class NODConfig:
-    root: str
-    MEG_bids_root: str
-    EEG_bids_root: str
-    MEG_events_root: str
-    EEG_events_root: str
+    def __init__(self, root):
+        if os.is_dir(root):
+            self.root = root
+        else:
+            raise ValueError('root must be a valid directory')
+    
+    def _get_info(self):
+        subs = ...
+        ses = ...
+        tasks = ...
+        runs = ...
+    
+    
 #%%
