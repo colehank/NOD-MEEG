@@ -139,7 +139,13 @@ class Preprocessing:
         self.raw = cleaned_raw
             
     @loading_('ICA process...')
-    def ica_process(self,lfreq=1,hfreq=100,splr=250, n_components=40, save=False, megnet=True)->None:
+    def ica_process(self,
+                    lfreq=1,
+                    hfreq=100,
+                    splr=250, 
+                    n_components=40, 
+                    save=False, 
+                    megnet=True)->None:
         ica_dir = self.ica_dir        
         raw_resmpl = self.raw.copy().pick_types(meg=True, ref_meg=False).load_data()
         raw_resmpl.resample(splr)
@@ -168,7 +174,10 @@ class Preprocessing:
         self.icamat_dir = icamat_dir
     
     @loading_('ICA automark...')
-    def ica_automark(self,model_path, n_jobs, save = True)->None:
+    def ica_automark(self,
+                     model_path, 
+                     n_jobs, 
+                     save = True)->None:
         with contextlib.redirect_stdout(io.StringIO()): # mute for simplicity
             mark_result = fPredictICA(self.icamat_dir, model_path, Ncomp = self.ica.n_components_, n_jobs=n_jobs)
         
@@ -243,7 +252,13 @@ class Preprocessing:
         self.process_info['ICA plot'] = 'DONE'
         
     @loading_('ICs reconstraction...')
-    def ica_reconst(self,exclude=None, lfreq=0.1, hfreq=100, splr=250)->None:
+    def ica_reconst(self,
+                    exclude=None, 
+                    lfreq=0.1, 
+                    hfreq=100, 
+                    splr=250
+                    )->None:
+        
         raw = self.raw.copy()
         raw.load_data()
         raw.resample(splr)
@@ -282,7 +297,9 @@ class Preprocessing:
         msg.info(f"Cleaned data saved in {self.clean_dir}")
         
         
-    def manual_pipeline0(self, model_path, n_jobs):
+    def manual_pipeline0(self, 
+                         model_path, 
+                        n_jobs):
         # preprocess raw and ICA
         self.bad_channels_fixing()
         self.zapline_denoise()
@@ -290,7 +307,11 @@ class Preprocessing:
         self.ica_automark(model_path,n_jobs = n_jobs,save=True)
         self.ica_plot()
         
-    def manual_pipeline1(self, manual_exlude,lfreq=0.1,hfreq=100,splr=250):
+    def manual_pipeline1(self, 
+                         manual_exlude,
+                         lfreq=0.1,
+                         hfreq=100,
+                         splr=250):
         # preprocess raw for alignment
         self.bad_channels_fixing()
         self.zapline_denoise()        

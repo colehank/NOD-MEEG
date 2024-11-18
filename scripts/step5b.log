@@ -1,0 +1,135 @@
+nohup: ignoring input
+Decoding subject:   0%|          | 0/30 [00:00<?, ?it/s]Decoding subject:   3%|▎         | 1/30 [00:59<28:58, 59.94s/it]Decoding subject:   7%|▋         | 2/30 [01:34<21:01, 45.04s/it]Decoding subject:  10%|█         | 3/30 [02:18<20:04, 44.63s/it]Decoding subject:  13%|█▎        | 4/30 [03:05<19:45, 45.59s/it]Decoding subject:  17%|█▋        | 5/30 [04:28<24:34, 58.98s/it]Decoding subject:  20%|██        | 6/30 [05:34<24:35, 61.46s/it]Decoding subject:  23%|██▎       | 7/30 [06:34<23:17, 60.75s/it]Decoding subject:  27%|██▋       | 8/30 [07:34<22:15, 60.70s/it]Decoding subject:  30%|███       | 9/30 [08:51<23:00, 65.73s/it]Decoding subject:  33%|███▎      | 10/30 [09:30<19:12, 57.65s/it]Decoding subject:  37%|███▋      | 11/30 [10:11<16:34, 52.33s/it]Decoding subject:  40%|████      | 12/30 [10:41<13:41, 45.64s/it]Decoding subject:  43%|████▎     | 13/30 [11:07<11:15, 39.74s/it]Decoding subject:  47%|████▋     | 14/30 [11:43<10:16, 38.56s/it]Decoding subject:  50%|█████     | 15/30 [12:15<09:06, 36.45s/it]Decoding subject:  53%|█████▎    | 16/30 [12:50<08:26, 36.17s/it]Decoding subject:  57%|█████▋    | 17/30 [13:28<07:55, 36.57s/it]Decoding subject:  60%|██████    | 18/30 [14:09<07:36, 38.08s/it]Decoding subject:  63%|██████▎   | 19/30 [14:45<06:52, 37.51s/it]Decoding subject:  67%|██████▋   | 20/30 [15:13<05:46, 34.64s/it]Decoding subject:  70%|███████   | 21/30 [15:45<05:02, 33.66s/it]Decoding subject:  73%|███████▎  | 22/30 [16:22<04:38, 34.84s/it]Decoding subject:  77%|███████▋  | 23/30 [16:58<04:06, 35.19s/it]Decoding subject:  80%|████████  | 24/30 [17:36<03:34, 35.80s/it]Decoding subject:  83%|████████▎ | 25/30 [18:14<03:03, 36.71s/it]Decoding subject:  87%|████████▋ | 26/30 [18:42<02:16, 34.00s/it]Decoding subject:  90%|█████████ | 27/30 [19:18<01:44, 34.68s/it]Decoding subject:  93%|█████████▎| 28/30 [19:57<01:11, 35.82s/it]Decoding subject:  97%|█████████▋| 29/30 [20:33<00:35, 35.93s/it]Decoding subject: 100%|██████████| 30/30 [21:05<00:00, 34.64s/it]Decoding subject: 100%|██████████| 30/30 [21:05<00:00, 42.17s/it]
+Decoding subject:   0%|          | 0/19 [00:00<?, ?it/s]Decoding subject:   5%|▌         | 1/19 [00:22<06:53, 22.97s/it]Decoding subject:  11%|█         | 2/19 [00:31<04:08, 14.60s/it]Decoding subject:  16%|█▌        | 3/19 [00:47<04:04, 15.29s/it]Decoding subject:  21%|██        | 4/19 [00:55<03:05, 12.38s/it]Decoding subject:  26%|██▋       | 5/19 [01:04<02:34, 11.01s/it]Decoding subject:  32%|███▏      | 6/19 [01:20<02:47, 12.90s/it]Decoding subject:  37%|███▋      | 7/19 [01:31<02:25, 12.15s/it]Decoding subject:  42%|████▏     | 8/19 [01:46<02:23, 13.07s/it]Decoding subject:  47%|████▋     | 9/19 [02:10<02:45, 16.51s/it]Decoding subject:  53%|█████▎    | 10/19 [02:19<02:08, 14.25s/it]Decoding subject:  58%|█████▊    | 11/19 [02:28<01:40, 12.54s/it]Decoding subject:  63%|██████▎   | 12/19 [02:36<01:17, 11.05s/it]Decoding subject:  68%|██████▊   | 13/19 [02:45<01:03, 10.53s/it]Decoding subject:  74%|███████▎  | 14/19 [02:54<00:51, 10.22s/it]Decoding subject:  79%|███████▉  | 15/19 [03:01<00:36,  9.01s/it]Decoding subject:  84%|████████▍ | 16/19 [03:07<00:24,  8.11s/it]Decoding subject:  89%|████████▉ | 17/19 [03:15<00:16,  8.21s/it]Decoding subject:  95%|█████████▍| 18/19 [03:27<00:09,  9.36s/it]Decoding subject: 100%|██████████| 19/19 [03:33<00:00,  8.35s/it]Decoding subject: 100%|██████████| 19/19 [03:33<00:00, 11.24s/it]
+Decoding subject:   0%|          | 0/30 [00:00<?, ?it/s]Decoding subject:   3%|▎         | 1/30 [00:18<08:45, 18.13s/it]Decoding subject:   7%|▋         | 2/30 [00:31<07:10, 15.37s/it]Decoding subject:  10%|█         | 3/30 [00:48<07:11, 15.98s/it]Decoding subject:  13%|█▎        | 4/30 [01:12<08:24, 19.39s/it]Decoding subject:  17%|█▋        | 5/30 [01:40<09:18, 22.33s/it]Decoding subject:  20%|██        | 6/30 [02:02<08:55, 22.31s/it]Decoding subject:  23%|██▎       | 7/30 [02:32<09:27, 24.68s/it]Decoding subject:  27%|██▋       | 8/30 [02:58<09:17, 25.33s/it]Decoding subject:  30%|███       | 9/30 [03:28<09:17, 26.57s/it]Decoding subject:  33%|███▎      | 10/30 [04:12<10:43, 32.16s/it]Decoding subject:  37%|███▋      | 11/30 [04:27<08:30, 26.86s/it]Decoding subject:  40%|████      | 12/30 [05:14<09:50, 32.80s/it]Decoding subject:  43%|████▎     | 13/30 [06:15<11:46, 41.57s/it]/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+Decoding subject:  47%|████▋     | 14/30 [08:03<16:23, 61.46s/it]Decoding subject:  50%|█████     | 15/30 [08:37<13:17, 53.20s/it]Decoding subject:  53%|█████▎    | 16/30 [09:35<12:47, 54.79s/it]Decoding subject:  57%|█████▋    | 17/30 [09:51<09:18, 42.98s/it]/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+Decoding subject:  60%|██████    | 18/30 [11:00<10:10, 50.87s/it]/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+Decoding subject:  63%|██████▎   | 19/30 [12:41<12:04, 65.90s/it]Decoding subject:  67%|██████▋   | 20/30 [13:25<09:54, 59.45s/it]Decoding subject:  70%|███████   | 21/30 [14:13<08:21, 55.72s/it]Decoding subject:  73%|███████▎  | 22/30 [14:32<05:59, 44.95s/it]Decoding subject:  77%|███████▋  | 23/30 [14:52<04:21, 37.41s/it]Decoding subject:  80%|████████  | 24/30 [15:17<03:22, 33.75s/it]/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+Decoding subject:  83%|████████▎ | 25/30 [16:38<03:59, 47.86s/it]/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+Decoding subject:  87%|████████▋ | 26/30 [17:38<03:25, 51.42s/it]Decoding subject:  90%|█████████ | 27/30 [18:08<02:15, 45.12s/it]/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+/nfs/z1/userhome/zzl-zhangguohao/.conda/envs/condamne/lib/python3.11/site-packages/sklearn/svm/_base.py:1235: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.
+  warnings.warn(
+Decoding subject:  93%|█████████▎| 28/30 [19:00<01:34, 47.15s/it]Decoding subject:  97%|█████████▋| 29/30 [19:25<00:40, 40.42s/it]Decoding subject: 100%|██████████| 30/30 [20:34<00:00, 49.07s/it]Decoding subject: 100%|██████████| 30/30 [20:34<00:00, 41.16s/it]
+Decoding subject:   0%|          | 0/19 [00:00<?, ?it/s]Decoding subject:   5%|▌         | 1/19 [00:13<03:59, 13.30s/it]Decoding subject:  11%|█         | 2/19 [00:19<02:39,  9.41s/it]Decoding subject:  16%|█▌        | 3/19 [00:28<02:25,  9.08s/it]Decoding subject:  21%|██        | 4/19 [00:33<01:53,  7.58s/it]Decoding subject:  26%|██▋       | 5/19 [00:36<01:22,  5.86s/it]Decoding subject:  32%|███▏      | 6/19 [00:39<01:03,  4.88s/it]Decoding subject:  37%|███▋      | 7/19 [00:42<00:51,  4.26s/it]Decoding subject:  42%|████▏     | 8/19 [00:45<00:42,  3.83s/it]Decoding subject:  47%|████▋     | 9/19 [00:51<00:44,  4.43s/it]Decoding subject:  53%|█████▎    | 10/19 [00:53<00:32,  3.66s/it]Decoding subject:  58%|█████▊    | 11/19 [00:55<00:25,  3.16s/it]Decoding subject:  63%|██████▎   | 12/19 [00:57<00:19,  2.85s/it]Decoding subject:  68%|██████▊   | 13/19 [00:59<00:15,  2.54s/it]Decoding subject:  74%|███████▎  | 14/19 [01:07<00:21,  4.24s/it]Decoding subject:  79%|███████▉  | 15/19 [01:13<00:19,  4.81s/it]Decoding subject:  84%|████████▍ | 16/19 [01:15<00:11,  3.90s/it]Decoding subject:  89%|████████▉ | 17/19 [01:17<00:06,  3.48s/it]Decoding subject:  95%|█████████▍| 18/19 [01:19<00:02,  2.97s/it]Decoding subject: 100%|██████████| 19/19 [01:24<00:00,  3.58s/it]Decoding subject: 100%|██████████| 19/19 [01:24<00:00,  4.46s/it]
+/nfs/z1/userhome/zzl-zhangguohao/workingdir/NOD-MEEG/scripts/step5b-decoding.py:165: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+  plt.tight_layout()
+/nfs/z1/userhome/zzl-zhangguohao/workingdir/NOD-MEEG/scripts/step5b-decoding.py:165: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+  plt.tight_layout()
+corrected p: 4.424778761061947e-05
+corrected p: 4.424778761061947e-05
+MEG has 171 sig times, EEG has 177 sig times
+MEG intial_sig_time:116.0,max_performance61.13999999999999 at 500.0ms
+EEG intial_sig_time:96.0,max_performance59.87669172932332 at 408.0ms
+corrected p: 4.424778761061947e-05
+corrected p: 4.424778761061947e-05
+MEG has 176 sig times, EEG has 169 sig times
+MEG intial_sig_time:96.0,max_performance69.3512151982948 at 272.0ms
+EEG intial_sig_time:100.0,max_performance66.14750720699047 at 220.0ms

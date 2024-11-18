@@ -67,7 +67,10 @@ def loading_(start="Processing..."):
     return decorator
 
 class Preprocessing():
-    def __init__(self, bids:BIDSPath, result_dir:str) -> None:
+    def __init__(self, 
+                 bids:BIDSPath, 
+                 result_dir:str
+                 ) -> None:
         runinfo = bids.basename.split('.')[0]
         msg.divider(f"prep - {runinfo}")
         with msg.loading(f'  Loading raw data'):
@@ -96,7 +99,9 @@ class Preprocessing():
         
     
     @loading_('Bad channels fixing...')
-    def bad_channels_fixing(self, is_interpolate=True)->None:
+    def bad_channels_fixing(self, 
+                            is_interpolate:bool=True
+                            )->None:
         raw_nd = self.raw.copy()
         nd = NoisyChannels(raw_nd, random_state=1337)
         nd.find_bad_by_correlation()
@@ -114,7 +119,9 @@ class Preprocessing():
         self.extra_info['bad channels fixing'] = nd.get_bads(as_dict=True)
     
     @loading_('Zapline denoising...')
-    def zapline_denoise(self, fline = 50)->None:
+    def zapline_denoise(self, 
+                        fline:float = 50
+                        )->None:
         data = self.raw.get_data().T
         data = np.expand_dims(data, axis=2)  # the shape now: (nsample, nchan, ntrial(1))
         sfreq = self.raw.info['sfreq']
@@ -126,10 +133,11 @@ class Preprocessing():
         self.raw = cleaned_raw 
         self.process_info['zapline denoise'] = 'DONE'
         self.extra_info['zapline denoise'] = f'fline - {fline}'
-        # pprint(self.process_info)
     
     @loading_('Re-refrencing...')
-    def rereference(self, ref='average')->None:
+    def rereference(self, 
+                    ref:str='average'
+                    )->None:
         refraw = self.raw.copy()
         refraw.set_eeg_reference(ref)
         self.raw = refraw
@@ -142,7 +150,14 @@ class Preprocessing():
         self.extra_info['re_reference bef ICA'] = ref
     
     @loading_('ICA and ICs automarking...')
-    def ica_automark(self, n_components=40, lfreq=1, hfreq=100, splr = 250, save = True)->None:
+    def ica_automark(self, 
+                     n_components=40, 
+                     lfreq=1, 
+                     hfreq=100, 
+                     splr = 250, 
+                     save = True
+                     )->None:
+        
         ica_dir=self.ica_dir
         raw_resmpl = self.raw.copy().pick_types(eeg=True).load_data()
         raw_resmpl.resample(splr)
@@ -187,8 +202,6 @@ class Preprocessing():
 
         raw_ica         = self.ica
         raw_resmpl      = self.raw4plot
-        labels          = self.extra_info['ICA auto label']
-        scores          = self.extra_info['ICA auto score']
 
         n_components    = raw_ica.n_components_
         n_cols = 5
@@ -200,8 +213,12 @@ class Preprocessing():
             col = i % n_cols
             ax = axes[row, col] if n_components > 1 else axes  
             raw_ica.plot_components(picks=i, axes=ax, sphere=(0, 0.02, 0, 0.09), show=False)
-            ax.set_title(f'{i} - {labels[i]}({scores[i]:.2f})', fontsize=40)
+            if i in self.extra_info['ICA mark']:
+                ax.set_title(f'{i} ', fontsize=50, color='red', fontweight='bold')
+            else:
+                ax.set_title(i, fontsize=40)
 
+        
         plt.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95, wspace=0.4, hspace=0.6)
         plt.savefig(os.path.join(ics_fig, f'{fn}.png'))
         plt.close(fig)
@@ -228,7 +245,13 @@ class Preprocessing():
         self.process_info['ICA plot'] = 'DONE'
     
     @loading_('ICs reconstraction...')
-    def ica_reconst(self,exclude=None, lfreq=0.1, hfreq=100, splr=250)->None:
+    def ica_reconst(self,
+                    exclude=None, 
+                    lfreq=0.1, 
+                    hfreq=100, 
+                    splr=250
+                    )->None:
+        
         raw = self.raw.copy()
         raw.load_data()
         raw.resample(splr)
@@ -270,6 +293,7 @@ class Preprocessing():
         msg.info(f"Cleaned data saved in {self.clean_dir}")
         
     def manual0_pipeline(self):
+        msg.info('Running before ICA manual exclude')
         self.bad_channels_fixing()
         self.zapline_denoise()
         self.rereference()#like eeglab, re-reference before ICA
@@ -277,7 +301,13 @@ class Preprocessing():
         self.ica_plot()
         
         
-    def manual1_pipeline(self, manual_exlude):
+    def manual1_pipeline(self, 
+                         manual_exlude,
+                         lfreq=0.1,
+                         hfreq=100,
+                         splr=250
+                         ):
+        msg.info('Running after ICA manual exclude')
         # preprocess raw for alignment
         self.bad_channels_fixing()
         self.zapline_denoise()
@@ -287,9 +317,16 @@ class Preprocessing():
         icafif = f'{self.ica_dir}/icafif/{self.runinfo}_ica.fif'
         ica = mne.preprocessing.read_ica(icafif)
         ica.exclude = manual_exlude
-        self.ica_plot()
-        ica.save(icafif, overwrite=True) # save ica with manual exclude label
+        ica.save(icafif, overwrite=True)
         self.ica = ica
+        self.extra_info['ICA mark'] = manual_exlude
+        
+        # plot prepare
+        raw4plot = self.raw.copy().pick_types(eeg=True).load_data()
+        raw4plot.resample(splr)
+        raw4plot.filter(lfreq,hfreq)
+        self.raw4plot = raw4plot
+        self.ica_plot()
         
         # ica reconst and save cleaned data
         self.ica_reconst()
@@ -300,7 +337,6 @@ class Preprocessing():
         sum_annot = {an: int(np.sum(annot.description == an)) for an in np.unique(annot.description)}
         self.extra_info['annot'] = sum_annot
         msg.info(f"Cleaned data saved in {self.clean_dir}")
-        
         
 #%%
 if __name__ == "__main__":

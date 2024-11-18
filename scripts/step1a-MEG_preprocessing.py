@@ -65,39 +65,3 @@ else:
     with open(f"{output_dir}/Preprocess_Info1.pkl", 'wb') as f:
         pickle.dump(process_info1, f)
             
-#%% Parallel processing
-# from tqdm_joblib import tqdm_joblib
-# from joblib import Parallel, delayed
-
-
-# def process_bid(bids, output_dir, MEGNET_MODEL, artifacts=None):
-#     preprocessor = prep.Preprocessing(bids, output_dir)
-#     if artifacts is not None:
-#         runinfo = preprocessor.runinfo
-#         preprocessor.manual1_pipeline(artifacts[runinfo])
-#     else:
-#         preprocessor.manual0_pipeline(model_path=MEGNET_MODEL, n_jobs=8)
-#     return preprocessor.runinfo, preprocessor.extra_info, preprocessor.process_info
-
-# all_bids = [bids for bidss in info.bids.values() for bids in bidss]
-
-# # 侧边文件
-# extra_info = {}
-# process_info = {}
-
-# if not MANUALED:
-#     with tqdm_joblib(desc="Processing", total=len(all_bids)) as progress_bar:
-#         results = Parallel(n_jobs=8)(
-#             delayed(process_bid)(bids, output_dir, MEGNET_MODEL) for bids in all_bids
-#         )
-# else:
-#     artifacts = json.load(open(f'{RAW_ROOT}/derivatives/ica/figs/artifact_ICs.json'))
-#     with tqdm_joblib(desc="Processing", total=len(all_bids)) as progress_bar:
-#         results = Parallel(n_jobs=8)(
-#             delayed(process_bid)(bids, output_dir, MEGNET_MODEL, artifacts) for bids in all_bids
-#         )
-        
-# for runinfo, extra, process in results:
-#     extra_info[runinfo] = extra
-#     process_info[runinfo] = process
-#%%
