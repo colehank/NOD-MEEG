@@ -5,7 +5,7 @@ This repository provides the codebase for the preprocessing, validation, and vis
 
 The repository is organized into the following primary subdirectories:
 
-- **[assets](https://github.com/colehank/NOD-MEEG/tree/main/assets)**: Contains preprocessing models and Representational Dissimilarity Matrices (RDMs) derived from the NOD-fMRI dataset.
+- **[assets](https://github.com/colehank/NOD-MEEG/tree/main/assets)**: Contains preprocessing models and Representational Dissimilarity Matrice (RDM) derived from the NOD-fMRI dataset.
 - **[scripts](https://github.com/colehank/NOD-MEEG/tree/main/scripts)**: Includes the core implementation for data preprocessing, visualization, and technical validation.
 - **[src](https://github.com/colehank/NOD-MEEG/tree/main/src)**: Provides general-purpose utility functions and classes for preprocessing workflows and validation procedures applied in this study.
 
