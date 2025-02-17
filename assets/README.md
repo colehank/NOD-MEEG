@@ -1,0 +1,3 @@
+- **Helvetica.ttc**: A font file used for generating plots within the repository.
+- **megnet.keras**: The ICA artifact recognition model, *MEGNet* ([GitHub link](https://github.com/DeepLearningForPrecisionHealthLab/MegNET_2020)), specifically designed for preprocessing and artifact removal in MEG data.
+- **ref_rdms.pkl**: The precomputed Representational Dissimilarity Matrices (RDMs) derived from the NOD-fMRI dataset and WordNet, which can be loaded using `joblib.load('ref_rdms.pkl')`.
