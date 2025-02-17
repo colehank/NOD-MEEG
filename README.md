@@ -1,10 +1,8 @@
 # NOD-MEEG: Natural Objects Dataset of MEG & EEG
 
-This repository contains code for preprocessing, validation, and plotting functions for the **NOD-MEEG** dataset.
+This repository contains code for preprocessing, validation, and plotting codes for the *A large-scale MEG and EEG dataset for object recognition in naturalistic scenes*.
 
 ## Overview
-
-This repository includes scripts to reproduce the neuroimaging analyses presented in the *A large-scale MEG and EEG dataset for object recognition in naturalistic scenes*.
 
 The structure is organized into three main subfolders:
 - **[assets](https://github.com/colehank/NOD-MEEG/tree/main/assets)**: Contains models for preprocessing and Representational Dissimilarity Matrices (RDMs) of NOD-fMRI data.
