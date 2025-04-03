@@ -1,17 +1,20 @@
 """
 Script to load MEG and EEG epoch data, compute evoked responses, and plot them using matplotlib.
 """
-#%%
+# %%
+from __future__ import annotations
+
 import os
 import os.path as op
-import numpy as np
-import mne
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-from matplotlib.gridspec import GridSpec
-from matplotlib import font_manager as fm
 
-font_path = '../assets/Helvetica.ttc'  
+import matplotlib.cm as cm
+import matplotlib.pyplot as plt
+import mne
+import numpy as np
+from matplotlib import font_manager as fm
+from matplotlib.gridspec import GridSpec
+
+font_path = '../assets/Helvetica.ttc'
 fm.fontManager.addfont(font_path)
 plt.rcParams['font.family'] = fm.FontProperties(fname=font_path).get_name()
 
@@ -21,8 +24,12 @@ COLORMAP_NAME = 'Spectral'
 
 DATA_DIR = '../../NOD-MEEG_upload'
 FIG_DIR = '../../NOD-MEEG_results/figs'
-MEG_EPOCH_ROOT = op.join(DATA_DIR, 'NOD-MEG', 'derivatives', 'preprocessed', 'epochs')
-EEG_EPOCH_ROOT = op.join(DATA_DIR, 'NOD-EEG', 'derivatives', 'preprocessed', 'epochs')
+MEG_EPOCH_ROOT = op.join(
+    DATA_DIR, 'NOD-MEG', 'derivatives', 'preprocessed', 'epochs',
+)
+EEG_EPOCH_ROOT = op.join(
+    DATA_DIR, 'NOD-EEG', 'derivatives', 'preprocessed', 'epochs',
+)
 
 meg_epoch_files = {
     filename.split('-')[1][:2]: op.join(MEG_EPOCH_ROOT, filename)
@@ -40,14 +47,19 @@ for subject in EXAMPLE_SUBJECTS:
     meg_epochs = mne.read_epochs(meg_epoch_files[subject])
     eeg_epochs = mne.read_epochs(eeg_epoch_files[subject])
     example_epochs[subject] = [meg_epochs, eeg_epochs]
-    example_evoked[subject] = [epochs.average() for epochs in example_epochs[subject]]
+    example_evoked[subject] = [
+        epochs.average()
+        for epochs in example_epochs[subject]
+    ]
 
 data_list = []
 for subject in example_evoked:
     for evoked in example_evoked[subject]:
         data_list.append(evoked.data)
 
-#%%
+# %%
+
+
 def plot_evoked(
     data_list: list,
     times: np.ndarray,
@@ -100,8 +112,8 @@ def plot_evoked(
             label_positions = {0: 0.9, 1: 0.7, 2: 0.6, 3: 0.55}
             label = 'EEG' if n_channels < 100 else 'MEG'
             subject_number = i//2+1
-            y_adjust = 0.15 if i in [0,1] else 0
-            
+            y_adjust = 0.15 if i in [0, 1] else 0
+
             ax.text(
                 1,
                 label_positions.get(i, 0),
@@ -111,8 +123,7 @@ def plot_evoked(
                 va='center',
                 ha='right',
             )
-            
-            
+
             ax.text(
                 0,
                 label_positions.get(i, 0) - y_adjust,
@@ -137,19 +148,20 @@ def plot_evoked(
     baseline_x = 0.11
     fig.add_subplot(111, frameon=False)
     plt.tick_params(
-        labelcolor='none', top=False, bottom=False, left=False, right=False
+        labelcolor='none', top=False, bottom=False, left=False, right=False,
     )
     plt.axvline(baseline_x, 0.1, color='black', linestyle='--', linewidth=1)
 
     # Add '...' text to indicate continuation
     fig.text(
-        baseline_x + 0.0475, 0.285, '...', va='center', fontsize=fontsize + 10
+        baseline_x + 0.0475, 0.285, '...', va='center', fontsize=fontsize + 10,
     )
 
     plt.subplots_adjust(hspace=0)
     plt.tight_layout(pad=0)
     plt.show()
     return fig
+
 
 # Prepare data for plotting
 times = example_evoked['01'][0].times * 1000  # Convert times to milliseconds
@@ -161,10 +173,10 @@ colors = [colormap(i / (num_colors - 1)) for i in range(num_colors)]
 alpha = 0.4
 linewidth = 0.8
 fig = plot_evoked(
-    data_list, times, colors, alpha=alpha, fontsize=FONT_SIZE, linewidth=linewidth
+    data_list, times, colors, alpha=alpha, fontsize=FONT_SIZE, linewidth=linewidth,
 )
 
 # Save the figure
 fig.savefig(op.join(FIG_DIR, 'erf&erp.svg'), dpi=600, bbox_inches='tight')
-# 
-#%%
+#
+# %%

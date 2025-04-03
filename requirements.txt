@@ -10,6 +10,7 @@ numpy==2.2.3
 pandas==2.2.3
 Pillow==11.1.0
 plotly==5.22.0
+pre-commit
 pyctf==1.0
 pyprep==0.4.3
 scikit_learn==1.4.2

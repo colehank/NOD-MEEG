@@ -11,5 +11,5 @@ The repository is organized into the following primary subdirectories:
 
 ## Datasets
 
-- **MEG Data**: Available on OpenNeuro under accession number [ds005810](https://openneuro.org/datasets/ds005810).  
-- **EEG Data**: Available on OpenNeuro under accession number [ds005811](https://openneuro.org/datasets/ds005811).  
+- **MEG Data**: Available on OpenNeuro under accession number [ds005810](https://openneuro.org/datasets/ds005810).
+- **EEG Data**: Available on OpenNeuro under accession number [ds005811](https://openneuro.org/datasets/ds005811).

@@ -1,31 +1,37 @@
-#%%
-import io
-import contextlib
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+# %%
+from __future__ import annotations
 
-import sys
 import argparse
+import contextlib
+import io
+import json
+import os
+import pickle
+import sys
+import warnings
+
 import numpy as np
 import pandas as pd
 import scipy.io
-idx = pd.IndexSlice
-from scipy.io import loadmat
-import json
-import pickle
 import scipy.stats as stats
 import tensorflow as tf
-from tensorflow import keras
+from joblib import delayed
+from joblib import Parallel
 from keras.models import load_model
-from joblib import Parallel, delayed
-
+from scipy.io import loadmat
+from tensorflow import keras
 from tqdm import TqdmExperimentalWarning
-import warnings
-warnings.filterwarnings('ignore', category=TqdmExperimentalWarning)
-
 from tqdm.autonotebook import tqdm
 from tqdm_joblib import tqdm_joblib
-#%%
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
+idx = pd.IndexSlice
+
+warnings.filterwarnings('ignore', category=TqdmExperimentalWarning)
+
+# %%
+
+
 def fGetStartTimesOverlap(intInputLen, intModelLen=15000, intOverlap=3750):
     """
     model len is 60 seconds at 250Hz = 15000
@@ -33,10 +39,11 @@ def fGetStartTimesOverlap(intInputLen, intModelLen=15000, intOverlap=3750):
     """
     lStartTimes = []
     intStartTime = 0
-    while intStartTime+intModelLen<=intInputLen:
+    while intStartTime+intModelLen <= intInputLen:
         lStartTimes.append(intStartTime)
         intStartTime = intStartTime+intModelLen-intOverlap
     return lStartTimes
+
 
 def fPredictChunkAndVoting(kModel, lTimeSeries, arrSpatialMap, arrY, intModelLen=15000, intOverlap=3750):
     """
@@ -45,7 +52,7 @@ def fPredictChunkAndVoting(kModel, lTimeSeries, arrSpatialMap, arrY, intModelLen
     The weight for the voting will be determined by the manout of time and overlap each chunk has with one another.
     For example if the total lenght of the scan is 50 seconds, and the chunks are 15 seconds long with a 5 second overlap:
         The first chunk will be the only chunk to use the first 10 seconds, and one of two chunks to use the next 5 seconds.
-            Thus   
+            Thus
 
     :param kModel: The model that will be used for the predictions on each chunk. It should have two inputs the spatial map and time series respectivley
     :type kModel: a keras model
@@ -58,7 +65,7 @@ def fPredictChunkAndVoting(kModel, lTimeSeries, arrSpatialMap, arrY, intModelLen
     :param intOverlap: The lenght of the overlap between scans, defaults to 3750
     :type intOverlap: int, optional
     """
-    #empty list to hold the prediction for each component pair
+    # empty list to hold the prediction for each component pair
     lPredictionsVote = []
     lGTVote = []
 
@@ -68,31 +75,47 @@ def fPredictChunkAndVoting(kModel, lTimeSeries, arrSpatialMap, arrY, intModelLen
     i = 0
     for arrScanTimeSeries, arrScanSpatialMap, arrScanY in zip(lTimeSeries, arrSpatialMap, arrY):
         intTimeSeriesLen = arrScanTimeSeries.shape[0]
-        lStartTimes = fGetStartTimesOverlap(intTimeSeriesLen, intModelLen=intModelLen, intOverlap=intOverlap)
+        lStartTimes = fGetStartTimesOverlap(
+            intTimeSeriesLen, intModelLen=intModelLen, intOverlap=intOverlap,
+        )
 
         if lStartTimes[-1]+intModelLen <= intTimeSeriesLen:
             lStartTimes.append(arrScanTimeSeries.shape[0]-intModelLen)
 
-
-        lTimeChunks = [[x,x+intModelLen] for x in lStartTimes]
-        dctTimeChunkVotes = dict([[x,0] for x in lStartTimes])
+        lTimeChunks = [[x, x+intModelLen] for x in lStartTimes]
+        dctTimeChunkVotes = {x: 0 for x in lStartTimes}
         for intT in range(intTimeSeriesLen):
-            lChunkMatches = [x <= intT < x+intModelLen for x in dctTimeChunkVotes.keys()]
+            lChunkMatches = [
+                x <= intT < x +
+                intModelLen for x in dctTimeChunkVotes.keys()
+            ]
             intInChunks = np.sum(lChunkMatches)
             for intStartTime, bTruth in zip(dctTimeChunkVotes.keys(), lChunkMatches):
                 if bTruth:
-                    dctTimeChunkVotes[intStartTime]+=1.0/intInChunks
+                    dctTimeChunkVotes[intStartTime] += 1.0/intInChunks
 
-        #predict
+        # predict
         dctWeightedPredictions = {}
         for intStartTime in dctTimeChunkVotes.keys():
-            lPrediction = kModel.predict([np.expand_dims(arrScanSpatialMap,0),
-                                        np.expand_dims(np.expand_dims(arrScanTimeSeries[intStartTime:intStartTime+intModelLen],0),-1)],
-                                         verbose=0)
+            lPrediction = kModel.predict(
+                [
+                    np.expand_dims(arrScanSpatialMap, 0),
+                    np.expand_dims(
+                        np.expand_dims(
+                            arrScanTimeSeries[
+                                intStartTime:intStartTime +
+                                intModelLen
+                            ], 0,
+                        ), -1,
+                    ),
+                ],
+                verbose=0,
+            )
             lPredictionsChunk.append(lPrediction)
             lGTChunk.append(arrScanY)
-            
-            dctWeightedPredictions[intStartTime] = lPrediction*dctTimeChunkVotes[intStartTime]
+
+            dctWeightedPredictions[intStartTime] = lPrediction * \
+                dctTimeChunkVotes[intStartTime]
 
         # arrScanPrediction = np.stack(dctWeightedPredictions.values())
         arrScanPrediction = np.stack(list(dctWeightedPredictions.values()))
@@ -100,12 +123,10 @@ def fPredictChunkAndVoting(kModel, lTimeSeries, arrSpatialMap, arrY, intModelLen
         arrScanPrediction = arrScanPrediction/arrScanPrediction.sum()
         lPredictionsVote.append(arrScanPrediction)
         lGTVote.append(arrScanY)
-        
-        print(f"\r{i+1}/{arrY.shape[0]}",end = '', flush=True)
-        i+=1
+
+        print(f"\r{i+1}/{arrY.shape[0]}", end='', flush=True)
+        i += 1
     return np.stack(lPredictionsVote), np.stack(lGTVote), np.stack(lPredictionsChunk), np.stack(lGTChunk)
-
-
 
 
 def fPredictChunkAndVoting(kModel, lTimeSeries, arrSpatialMap, arrY, intModelLen=15000, intOverlap=3750, n_jobs=-1):
@@ -114,51 +135,77 @@ def fPredictChunkAndVoting(kModel, lTimeSeries, arrSpatialMap, arrY, intModelLen
     """
     def process_scan(arrScanTimeSeries, arrScanSpatialMap, arrScanY):
         intTimeSeriesLen = arrScanTimeSeries.shape[0]
-        lStartTimes = fGetStartTimesOverlap(intTimeSeriesLen, intModelLen=intModelLen, intOverlap=intOverlap)
+        lStartTimes = fGetStartTimesOverlap(
+            intTimeSeriesLen, intModelLen=intModelLen, intOverlap=intOverlap,
+        )
 
         if lStartTimes[-1] + intModelLen <= intTimeSeriesLen:
             lStartTimes.append(arrScanTimeSeries.shape[0] - intModelLen)
 
         lTimeChunks = [[x, x + intModelLen] for x in lStartTimes]
-        dctTimeChunkVotes = dict([[x, 0] for x in lStartTimes])
+        dctTimeChunkVotes = {x: 0 for x in lStartTimes}
         for intT in range(intTimeSeriesLen):
-            lChunkMatches = [x <= intT < x + intModelLen for x in dctTimeChunkVotes.keys()]
+            lChunkMatches = [
+                x <= intT < x +
+                intModelLen for x in dctTimeChunkVotes.keys()
+            ]
             intInChunks = np.sum(lChunkMatches)
             for intStartTime, bTruth in zip(dctTimeChunkVotes.keys(), lChunkMatches):
                 if bTruth:
                     dctTimeChunkVotes[intStartTime] += 1.0 / intInChunks
 
-        
         dctWeightedPredictions = {}
         lPredictionsChunk = []
         lGTChunk = []
 
         for intStartTime in dctTimeChunkVotes.keys():
-            lPrediction = kModel.predict([np.expand_dims(arrScanSpatialMap, 0),
-                                          np.expand_dims(np.expand_dims(arrScanTimeSeries[intStartTime:intStartTime + intModelLen], 0), -1)],
-                                         verbose=0)
+            lPrediction = kModel.predict(
+                [
+                    np.expand_dims(arrScanSpatialMap, 0),
+                    np.expand_dims(
+                        np.expand_dims(
+                            arrScanTimeSeries[
+                                intStartTime:intStartTime +
+                                intModelLen
+                            ], 0,
+                        ), -1,
+                    ),
+                ],
+                verbose=0,
+            )
             lPredictionsChunk.append(lPrediction)
             lGTChunk.append(arrScanY)
-            dctWeightedPredictions[intStartTime] = lPrediction * dctTimeChunkVotes[intStartTime]
+            dctWeightedPredictions[intStartTime] = lPrediction * \
+                dctTimeChunkVotes[intStartTime]
 
-        arrScanPrediction = np.stack(list(dctWeightedPredictions.values())).mean(axis=0)
+        arrScanPrediction = np.stack(
+            list(dctWeightedPredictions.values()),
+        ).mean(axis=0)
         arrScanPrediction = arrScanPrediction / arrScanPrediction.sum()
 
         return arrScanPrediction, arrScanY, lPredictionsChunk, lGTChunk
 
-    with tqdm_joblib(desc="ICA Predicting", total=len(lTimeSeries), leave=False) as progress_bar:
-        results = Parallel(n_jobs=n_jobs)(delayed(process_scan)(arrScanTimeSeries, arrScanSpatialMap, arrScanY)
-                                          for arrScanTimeSeries, arrScanSpatialMap, arrScanY in zip(lTimeSeries, arrSpatialMap, arrY))
-    
+    with tqdm_joblib(desc='ICA Predicting', total=len(lTimeSeries), leave=False) as progress_bar:
+        results = Parallel(n_jobs=n_jobs)(
+            delayed(process_scan)(
+                arrScanTimeSeries,
+                arrScanSpatialMap, arrScanY,
+            )
+            for arrScanTimeSeries, arrScanSpatialMap, arrScanY in zip(lTimeSeries, arrSpatialMap, arrY)
+        )
+
     lPredictionsVote, lGTVote, lPredictionsChunk, lGTChunk = zip(*results)
 
-    return (np.stack(lPredictionsVote), 
-            np.stack(lGTVote), 
-            np.vstack([np.stack(chunks) for chunks in lPredictionsChunk]), 
-            np.vstack([np.stack(gt) for gt in lGTChunk]))
+    return (
+        np.stack(lPredictionsVote),
+        np.stack(lGTVote),
+        np.vstack([np.stack(chunks) for chunks in lPredictionsChunk]),
+        np.vstack([np.stack(gt) for gt in lGTChunk]),
+    )
 
-def fPredictICA(strSubjectICAPath, strModelPath, Ncomp = 100,strOutputDir=None, strOutputType='list', n_jobs=8):
-    """ 
+
+def fPredictICA(strSubjectICAPath, strModelPath, Ncomp=100, strOutputDir=None, strOutputType='list', n_jobs=8):
+    """
         Predict Independent Component Analysis (ICA) labels using a pre-trained model.
         This function loads ICA time series and spatial maps, ensures their compatibility,
         and uses a pre-trained model to predict labels for each ICA component. The predictions
@@ -192,52 +239,75 @@ def fPredictICA(strSubjectICAPath, strModelPath, Ncomp = 100,strOutputDir=None, 
         - The spatial maps are expected to have a shape of [N, 120, 120, 3].
         - The time series should have at least 15000 samples.
     """
-    #loading the data is from our Brainstorm Pipeline, it may require some minor edits based on how the data is saved.
-    #load the time seris and the spatial map
-    arrTimeSeries = scipy.io.loadmat(os.path.join(strSubjectICAPath,'ICATimeSeries.mat'))['arrICATimeSeries'].T
-    arrSpatialMap = np.array([scipy.io.loadmat(os.path.join(strSubjectICAPath,f'component{i}.mat'))['array'] for i in range(1,Ncomp+1)])
-    #crop the spatial map to remove additional pixels
+    # loading the data is from our Brainstorm Pipeline, it may require some minor edits based on how the data is saved.
+    # load the time seris and the spatial map
+    arrTimeSeries = scipy.io.loadmat(
+        os.path.join(
+            strSubjectICAPath, 'ICATimeSeries.mat',
+        ),
+    )['arrICATimeSeries'].T
+    arrSpatialMap = np.array([
+        scipy.io.loadmat(
+            os.path.join(
+                strSubjectICAPath, f'component{i}.mat',
+            ),
+        )['array'] for i in range(1, Ncomp+1)
+    ])
+    # crop the spatial map to remove additional pixels
     # arrSpatialMap = arrSpatialMap[:,30:-30,15:-15,:]
-    #ensure the data is compatable
+    # ensure the data is compatable
     try:
-        assert arrTimeSeries.shape[0] == arrSpatialMap.shape[0], "The number of time series should be the same as the number of spatial maps"
-        assert arrSpatialMap.shape[1:] == (120, 120, 3), "The spatial maps should have a shape of [N, 120, 120, 3]"
-        assert arrTimeSeries.shape[1] >= 15000, "The time series need to be at least 60 seconds with a sample rate of 250Hz (60*250=15000)"
+        assert arrTimeSeries.shape[0] == arrSpatialMap.shape[
+            0
+        ], 'The number of time series should be the same as the number of spatial maps'
+        assert arrSpatialMap.shape[1:] == (
+            120, 120, 3,
+        ), 'The spatial maps should have a shape of [N, 120, 120, 3]'
+        assert arrTimeSeries.shape[
+            1
+        ] >= 15000, 'The time series need to be at least 60 seconds with a sample rate of 250Hz (60*250=15000)'
     except AssertionError as e:
-        raise ValueError(f"The data does not have the correct dimensions: {str(e)}")
-        
+        raise ValueError(
+            f"The data does not have the correct dimensions: {str(e)}",
+        )
+
     # custom_objects = {
     # 'Addons>F1Score': tfa.metrics.F1Score
     #                     }
     KModel = load_model(strModelPath)
     # KModel = keras.layers.TFSMLayer('/nfs/z1/userhome/zzl-zhangguohao/workingdir/NOD-MEEG_codes/utils/megnet_model/megnet-enigma_model', call_endpoint='serving_default')
-    
-    #use the vote chunk prediction function to make a prediction on each input
-    output = fPredictChunkAndVoting(KModel, 
-                                    arrTimeSeries, 
-                                    arrSpatialMap, 
-                                    np.zeros((Ncomp,3)), #the code expects the Y values as it was used for performance, just put in zeros as a place holder.
-                                    intModelLen=15000, 
-                                    intOverlap=3750,
-                                    n_jobs=n_jobs)
+
+    # use the vote chunk prediction function to make a prediction on each input
+    output = fPredictChunkAndVoting(
+        KModel,
+        arrTimeSeries,
+        arrSpatialMap,
+        # the code expects the Y values as it was used for performance, just put in zeros as a place holder.
+        np.zeros((Ncomp, 3)),
+        intModelLen=15000,
+        intOverlap=3750,
+        n_jobs=n_jobs,
+    )
     arrPredicionsVote, arrGTVote, arrPredictionsChunk, arrGTChunk = output
 
-    #format the predictions
+    # format the predictions
     if strOutputType.lower() == 'array':
-        to_return = arrPredicionsVote[:,0,:]
+        to_return = arrPredicionsVote[:, 0, :]
     else:
-        to_return = arrPredicionsVote[:,0,:].argmax(axis=1)
-    
-    #save the predictions if path is given
+        to_return = arrPredicionsVote[:, 0, :].argmax(axis=1)
+
+    # save the predictions if path is given
     if not strOutputDir is None:
-        strOutputPath = os.path.join(strOutputDir,'ICA_component_lables.txt')
+        strOutputPath = os.path.join(strOutputDir, 'ICA_component_lables.txt')
         np.savetxt(strOutputPath, to_return)
 
     return to_return
-#%%
+
+
+# %%
 if __name__ == '__main__':
     classes = {}
-            
+
     megnet_root = '/nfs/z1/userhome/zzl-zhangguohao/workingdir/NOD-MEEG_data/NOD-MEG/derivatives/preprocessed/ICA/megnet'
     # model = '/nfs/z1/userhome/zzl-zhangguohao/workingdir/NOD-MEEG_codes/utils/megnet_model/MEGnet_final_model.h5'
     model = '/nfs/z1/userhome/zzl-zhangguohao/workingdir/NOD-MEEG/models/megnet_enigma.keras'
@@ -248,9 +318,9 @@ if __name__ == '__main__':
         if runp.split('/')[-1] in classes.keys():
             continue
         else:
-            out = fPredictICA(runp,model)
+            out = fPredictICA(runp, model)
             classes[runp.split('/')[-1]] = list(out)
 
     with open(f'{megnet_root}/classes.json', 'w') as f:
         json.dump(classes, f, default=str, indent=4)
-#%%
+# %%

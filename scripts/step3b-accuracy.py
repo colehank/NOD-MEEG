@@ -1,9 +1,12 @@
-#%%
+# %%
+from __future__ import annotations
+
 import os
 import os.path as op
-import pandas as pd
-import numpy as np
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 import seaborn as sns
 
 ROOT = '../../NOD-MEEG_upload'
@@ -13,7 +16,9 @@ MEG_ROOT = op.join(ROOT, 'NOD-MEG', 'events')
 SAVE_DIR = '../../NOD-MEEG_results'
 FIG_DIR = f'{SAVE_DIR}/figs'
 FONT_SIZE = 12
-#%%
+# %%
+
+
 def get_files(root_dir):
     """Get a dictionary mapping subject IDs to file paths in the specified directory.
 
@@ -34,6 +39,7 @@ def get_files(root_dir):
             files[subject_id] = op.join(root_dir, filename)
     return files
 
+
 def extract_sub_accuracy(file_path):
     """Extract accuracy per session for a given subject file.
 
@@ -41,7 +47,7 @@ def extract_sub_accuracy(file_path):
     ----------
     file_path : str
         Path to the subject's data file.
-        
+
     Returns:
     ----------
     dict
@@ -51,16 +57,20 @@ def extract_sub_accuracy(file_path):
     subject_accuracy = {}
     for session in event_data['session'].unique():
         session_data = event_data[event_data['session'] == session]
-        responses = pd.to_numeric(session_data['resp_is_right'], errors='coerce').values
+        responses = pd.to_numeric(
+            session_data['resp_is_right'], errors='coerce',
+        ).values
         accuracy = np.mean(responses)
         subject_accuracy[session] = accuracy
     return subject_accuracy
+
 
 def extract_accuracy(files_dict):
     accuracies = {}
     for subject_id in files_dict:
         accuracies[subject_id] = extract_sub_accuracy(files_dict[subject_id])
     return accuracies
+
 
 def make_main_plot(plot_dict, fontsize=12):
     """Create a scatter plot of accuracies per subject and session.
@@ -83,7 +93,7 @@ def make_main_plot(plot_dict, fontsize=12):
     # Define markers for EEG and MEG
     marker_dict = {
         'EEG': '^',  # Triangle up
-        'MEG': 's'   # Square
+        'MEG': 's',   # Square
     }
 
     # Get session names from the first subject
@@ -92,7 +102,10 @@ def make_main_plot(plot_dict, fontsize=12):
     # Define colors for sessions
     colors = sns.color_palette(palette='Spectral', n_colors=5)
     del colors[2]  # Remove the third color to have 4 colors
-    color_dict = {session_name: colors[i] for i, session_name in enumerate(session_names)}
+    color_dict = {
+        session_name: colors[i]
+        for i, session_name in enumerate(session_names)
+    }
 
     offset = 0.4  # Offset for x-axis positions
 
@@ -119,7 +132,8 @@ def make_main_plot(plot_dict, fontsize=12):
             subject_labels.append(subject_num)
 
         # Adjust position based on data type (EEG or MEG)
-        subject_actual_pos = subject_positions[subject_num] + (offset if datatype == 'EEG' else -offset)
+        subject_actual_pos = subject_positions[subject_num] + \
+            (offset if datatype == 'EEG' else -offset)
 
         marker_style = marker_dict[datatype]
 
@@ -137,7 +151,7 @@ def make_main_plot(plot_dict, fontsize=12):
             ax.scatter(
                 subject_actual_pos, accuracy,
                 facecolors='none', edgecolors=color, marker=marker_style,
-                s=50, linewidths=3, alpha=1.0, label=label
+                s=50, linewidths=3, alpha=1.0, label=label,
             )
 
     # Set x-axis ticks and labels
@@ -166,7 +180,8 @@ def make_main_plot(plot_dict, fontsize=12):
 
     return fig
 
-#%%
+
+# %%
 EEG_FILES = get_files(EEG_ROOT)
 MEG_FILES = get_files(MEG_ROOT)
 EEG_accu = extract_accuracy(EEG_FILES)
@@ -177,4 +192,4 @@ plot_dict.update({f'EEG{sub}': EEG_accu[sub] for sub in EEG_accu})
 
 fig = make_main_plot(plot_dict, fontsize=FONT_SIZE)
 fig.savefig(f'{FIG_DIR}/accuracy.svg', dpi=600, bbox_inches='tight')
-#%%
+# %%

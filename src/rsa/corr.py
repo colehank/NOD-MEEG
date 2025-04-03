@@ -1,10 +1,16 @@
-#%%
+# %%
+from __future__ import annotations
+
 import numpy as np
-from scipy.stats import spearmanr, kendalltau
+from joblib import delayed
+from joblib import Parallel
 from numpy.typing import NDArray
-from joblib import Parallel, delayed
+from scipy.stats import kendalltau
+from scipy.stats import spearmanr
 from tqdm_joblib import tqdm_joblib
-#%%
+# %%
+
+
 class RSA:
     """Perform RSA between RDMs.
 
@@ -42,61 +48,63 @@ class RSA:
         self.n_jobs = n_jobs
         self.n_iter = n_iter
         self.alpha = alpha
-        
+
     def rsa(
         self,
         corr_method: str,
         sig_method: str,
-        ) -> tuple:
+    ) -> tuple:
         """
         Compute the correlation between RDMs with statistical significance testing.
-        
+
         Parameters
         ----------
         corr_method : str
             The correlation method. One of 'spearman', 'pearson', 'kendall'.
         sig_method : str
             The significance testing method. One of 'bootstrap', 'permutation'.
-        
+
         Returns
         -------
         corr : float
             The correlation coefficient between the two RDMs.
         stats : NDArray
-            The bootstrapped or permuted correlation coefficients, 
+            The bootstrapped or permuted correlation coefficients,
             depending on `sig_method`.
-            if `sig_method` is 'bootstrap', 
+            if `sig_method` is 'bootstrap',
             it is the bootstrapped confidence intervals(CI), or a list of CI.
             if `sig_method` is 'permutation',
             it is the permuted significance levels(p), or a list of p.
         """
-        
+
         if self.input_type == 'one2one':
             corr, sig = self.corr_rdm(
                 corr_method,
-                sig_method
+                sig_method,
             )
-        
+
         elif self.input_type == 'one2n':
             corr, sigs = self.corr_rdm_rdms(
                 corr_method,
-                sig_method
+                sig_method,
             )
-        
+
         elif self.input_type == 'n2n':
             corr, sigs = self.corr_rdms(
                 corr_method,
-                sig_method
+                sig_method,
             )
         else:
-            raise ValueError('input_type must be one of "n2n", "one2n", "one2one"')
+            raise ValueError(
+                'input_type must be one of "n2n", "one2n", "one2one"',
+            )
 
         if self.input_type == 'one2one':
             self.corr
             return corr, sig
         else:
             return corr, sigs
-        
+
     def corr_rdm(
         self,
         corr_method: str,
@@ -117,26 +125,28 @@ class RSA:
         corr : float
             The correlation coefficient between the two RDMs.
         stats : tuple or float
-            The confidence interval (if `sig_method` is 'bootstrap') 
+            The confidence interval (if `sig_method` is 'bootstrap')
             or p-value (if `sig_method` is 'permutation').
         """
         if sig_method == 'bootstrap':
             corr, boot_cs = self.corr_bootstrap(
-                self.rdm1, self.rdm2, corr_method, n_bootstraps=self.n_iter, n_jobs=self.n_jobs
+                self.rdm1, self.rdm2, corr_method, n_bootstraps=self.n_iter, n_jobs=self.n_jobs,
             )
             ci_lower = np.percentile(boot_cs, 100 * self.alpha / 2)
             ci_upper = np.percentile(boot_cs, 100 * (1 - self.alpha / 2))
-            
+
             return corr, (ci_lower, ci_upper)
-        
+
         elif sig_method == 'permutation':
             corr, perm_cs = self.corr_permutation(
-                self.rdm1, self.rdm2, corr_method, n_permutations=self.n_iter, n_jobs=self.n_jobs
+                self.rdm1, self.rdm2, corr_method, n_permutations=self.n_iter, n_jobs=self.n_jobs,
             )
             p = np.sum(perm_cs >= corr) / len(perm_cs)
             return corr, p
         else:
-            raise ValueError('sig_method must be one of "bootstrap", "permutation"')
+            raise ValueError(
+                'sig_method must be one of "bootstrap", "permutation"',
+            )
 
     def corr_rdms(
         self,
@@ -158,14 +168,14 @@ class RSA:
         corrs : list of float
             List of correlation coefficients between paired RDMs.
         ci_or_p : list
-            List of confidence intervals (if `sig_method` is 'bootstrap') 
+            List of confidence intervals (if `sig_method` is 'bootstrap')
             or p-values (if `sig_method` is 'permutation').
         """
         n_pair = self.rdm1.shape[0]
         corrs = []
         ci = []  # Initialize outside the loop
         ps = []  # Initialize outside the loop
-        
+
         for i, (rdm1_i, rdm2_i) in enumerate(zip(self.rdm1, self.rdm2)):
             desc = f'{i + 1}/{n_pair}'
 
@@ -175,7 +185,7 @@ class RSA:
                     corr_method,
                     n_bootstraps=self.n_iter,
                     n_jobs=self.n_jobs,
-                    desc=desc
+                    desc=desc,
                 )
                 ci_lower = np.percentile(boot_cs, 100 * self.alpha / 2)
                 ci_upper = np.percentile(boot_cs, 100 * (1 - self.alpha / 2))
@@ -185,13 +195,15 @@ class RSA:
             elif sig_method == 'permutation':
                 corr, perm_cs = self.corr_permutation(
                     rdm1_i, rdm2_i, corr_method, n_permutations=self.n_iter, n_jobs=self.n_jobs,
-                    desc=desc
+                    desc=desc,
                 )
                 p = np.sum(perm_cs >= corr) / len(perm_cs)
                 corrs.append(corr)
                 ps.append(p)
             else:
-                raise ValueError('sig_method must be one of "bootstrap", "permutation"')
+                raise ValueError(
+                    'sig_method must be one of "bootstrap", "permutation"',
+                )
 
         if sig_method == 'bootstrap':
             return corrs, ci
@@ -236,7 +248,7 @@ class RSA:
                     corr_method,
                     n_bootstraps=self.n_iter,
                     n_jobs=self.n_jobs,
-                    desc=desc
+                    desc=desc,
                 )
                 ci_lower = np.percentile(boot_cs, 100 * self.alpha / 2)
                 ci_upper = np.percentile(boot_cs, 100 * (1 - self.alpha / 2))
@@ -249,13 +261,15 @@ class RSA:
                     corr_method,
                     n_permutations=self.n_iter,
                     n_jobs=self.n_jobs,
-                    desc=desc
+                    desc=desc,
                 )
                 p = np.sum(perm_cs >= corr) / len(perm_cs)
                 corrs.append(corr)
                 ps.append(p)
             else:
-                raise ValueError('sig_method must be one of "bootstrap", "permutation"')
+                raise ValueError(
+                    'sig_method must be one of "bootstrap", "permutation"',
+                )
 
         if sig_method == 'bootstrap':
             return corrs, ci
@@ -300,7 +314,7 @@ class RSA:
         v2 = self._rdm2vec(rdm2)
         corr = self._corr(v1, v2, corr_method)
 
-        desc = kwargs.get('desc', "Bootstrap process:")
+        desc = kwargs.get('desc', 'Bootstrap process:')
         with tqdm_joblib(total=n_bootstraps, desc=desc, leave=False):
             boot_cs = Parallel(n_jobs=n_jobs)(
                 delayed(self._bootstrap)(v1, v2, corr_method) for _ in range(n_bootstraps)
@@ -346,7 +360,7 @@ class RSA:
         v2 = self._rdm2vec(rdm2)
         corr = self._corr(v1, v2, corr_method)
 
-        desc = kwargs.get('desc', "Permutation process:")
+        desc = kwargs.get('desc', 'Permutation process:')
         with tqdm_joblib(total=n_permutations, desc=desc, leave=False):
             perm_cs = Parallel(n_jobs=n_jobs)(
                 delayed(self._permutation)(v1, v2, corr_method) for _ in range(n_permutations)
@@ -384,7 +398,9 @@ class RSA:
         elif method == 'kendall':
             corr, _ = kendalltau(v1, v2)
         else:
-            raise ValueError('method must be one of "spearman", "pearson", "kendall"')
+            raise ValueError(
+                'method must be one of "spearman", "pearson", "kendall"',
+            )
         return corr
 
     def _bootstrap(self, v1: NDArray, v2: NDArray, method: str) -> float:
@@ -436,7 +452,7 @@ class RSA:
 
     def _rdm2vec(
         self,
-        rdm: NDArray
+        rdm: NDArray,
     ) -> NDArray:
         """
         Convert a square RDM matrix to a vector of its lower triangle elements.
@@ -481,23 +497,30 @@ class RSA:
         """
         if not isinstance(rdm1, np.ndarray) or not isinstance(rdm2, np.ndarray):
             raise TypeError(
-                f'Input RDMs should be numpy arrays, got {type(rdm1)} and {type(rdm2)}'
+                f'Input RDMs should be numpy arrays, got {type(rdm1)} and {type(rdm2)}',
             )
         if input_type == 'n2n':
             if rdm1.ndim != 3 or rdm2.ndim != 3:
-                raise ValueError('Both RDMs should be 3D arrays for input_type "n2n"')
+                raise ValueError(
+                    'Both RDMs should be 3D arrays for input_type "n2n"',
+                )
         elif input_type == 'one2n':
             if rdm1.ndim != 2 or rdm2.ndim != 3:
                 raise ValueError(
-                    'rdm1 should be a 2D array and rdm2 should be a 3D array for input_type "one2n"'
+                    'rdm1 should be a 2D array and rdm2 should be a 3D array for input_type "one2n"',
                 )
         elif input_type == 'one2one':
             if rdm1.ndim != 2 or rdm2.ndim != 2:
-                raise ValueError('Both RDMs should be 2D arrays for input_type "one2one"')
+                raise ValueError(
+                    'Both RDMs should be 2D arrays for input_type "one2one"',
+                )
         else:
-            raise ValueError('input_type must be one of "n2n", "one2n", "one2one"')
+            raise ValueError(
+                'input_type must be one of "n2n", "one2n", "one2one"',
+            )
 
-#%%
+
+# %%
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
     from matplotlib.patches import Patch
@@ -514,7 +537,8 @@ if __name__ == '__main__':
         Creates an RDM where dissimilarity decreases with index difference.
         """
         max_distance = size - 1
-        rdm = max_distance - np.abs(np.subtract.outer(np.arange(size), np.arange(size)))
+        rdm = max_distance - \
+            np.abs(np.subtract.outer(np.arange(size), np.arange(size)))
         return rdm
 
     def create_noisy_rdm(base_rdm, noise_level):
@@ -536,8 +560,6 @@ if __name__ == '__main__':
         rdm_random = (random_matrix + random_matrix.T) / 2
         np.fill_diagonal(rdm_random, 0)
         return rdm_random
-
-
 
     # Create RDMs for different input types
     rdm_one2one_1 = create_linear_patterned_rdm(10)
@@ -573,8 +595,12 @@ if __name__ == '__main__':
         rdms_n2n_1.append(rdm1)
         rdms_n2n_2.append(rdm2)
     for _ in range(5):
-        rdm1 = create_noisy_rdm(create_linear_patterned_rdm(10), noise_level=0.5)
-        rdm2 = create_noisy_rdm(create_inverse_linear_patterned_rdm(10), noise_level=0.5)
+        rdm1 = create_noisy_rdm(
+            create_linear_patterned_rdm(10), noise_level=0.5,
+        )
+        rdm2 = create_noisy_rdm(
+            create_inverse_linear_patterned_rdm(10), noise_level=0.5,
+        )
         rdms_n2n_1.append(rdm1)
         rdms_n2n_2.append(rdm2)
     rdms_n2n_1 = np.array(rdms_n2n_1)
@@ -586,7 +612,7 @@ if __name__ == '__main__':
         rdm2=rdm_one2one_2,
         input_type='one2one',
         n_jobs=20,
-        n_iter=1000  # Adjusted for testing
+        n_iter=1000,  # Adjusted for testing
     )
 
     # One2N
@@ -595,7 +621,7 @@ if __name__ == '__main__':
         rdm2=rdm_one2n_n,
         input_type='one2n',
         n_jobs=20,
-        n_iter=1000  # Adjusted for testing
+        n_iter=1000,  # Adjusted for testing
     )
 
     # N2N
@@ -604,25 +630,25 @@ if __name__ == '__main__':
         rdm2=rdms_n2n_2,
         input_type='n2n',
         n_jobs=20,
-        n_iter=1000  # Adjusted for testing
+        n_iter=1000,  # Adjusted for testing
     )
 
     # Use RSA.rsa function for One2One
     corr_one2one, ci_one2one = rsa_one2one.rsa(
         corr_method='pearson',
-        sig_method='bootstrap'
+        sig_method='bootstrap',
     )
 
     # Use RSA.rsa function for One2N
     corrs_one2n, ps_one2n = rsa_one2n.rsa(
         corr_method='spearman',
-        sig_method='permutation'
+        sig_method='permutation',
     )
 
     # Use RSA.rsa function for N2N
     corrs_n2n, ci_n2n = rsa_n2n.rsa(
         corr_method='kendall',
-        sig_method='bootstrap'
+        sig_method='bootstrap',
     )
 
     # Visualization code remains the same, with variable names adjusted if necessary
@@ -631,9 +657,18 @@ if __name__ == '__main__':
     boot_cs_one2one = np.linspace(ci_one2one[0], ci_one2one[1], 200)
     plt.figure(figsize=(6, 4))
     plt.hist(boot_cs_one2one, bins=30, color='skyblue', edgecolor='black')
-    plt.axvline(corr_one2one, color='red', linestyle='dashed', linewidth=2, label=f'Observed Corr = {corr_one2one:.4f}')
-    plt.axvline(ci_one2one[0], color='green', linestyle='dashed', linewidth=2, label=f'95% CI Lower = {ci_one2one[0]:.4f}')
-    plt.axvline(ci_one2one[1], color='green', linestyle='dashed', linewidth=2, label=f'95% CI Upper = {ci_one2one[1]:.4f}')
+    plt.axvline(
+        corr_one2one, color='red', linestyle='dashed',
+        linewidth=2, label=f'Observed Corr = {corr_one2one:.4f}',
+    )
+    plt.axvline(
+        ci_one2one[0], color='green', linestyle='dashed',
+        linewidth=2, label=f'95% CI Lower = {ci_one2one[0]:.4f}',
+    )
+    plt.axvline(
+        ci_one2one[1], color='green', linestyle='dashed',
+        linewidth=2, label=f'95% CI Upper = {ci_one2one[1]:.4f}',
+    )
     plt.title('One2One: Bootstrapped Correlation Coefficients')
     plt.xlabel('Correlation Coefficient')
     plt.ylabel('Frequency')
@@ -657,7 +692,7 @@ if __name__ == '__main__':
     legend_elements = [
         Patch(facecolor='green', edgecolor='black', label='Similar RDMs'),
         Patch(facecolor='blue', edgecolor='black', label='Random RDMs'),
-        Patch(facecolor='red', edgecolor='black', label='Different RDMs')
+        Patch(facecolor='red', edgecolor='black', label='Different RDMs'),
     ]
     plt.legend(handles=legend_elements)
     plt.show()
@@ -669,9 +704,14 @@ if __name__ == '__main__':
     ci_upper_array_n2n = np.array([ci_pair[1] for ci_pair in ci_n2n])
 
     plt.figure(figsize=(8, 4))
-    plt.errorbar(indices_n2n, corrs_array_n2n,
-                 yerr=[corrs_array_n2n - ci_lower_array_n2n, ci_upper_array_n2n - corrs_array_n2n],
-                 color='black', ecolor='black', capsize=5)
+    plt.errorbar(
+        indices_n2n, corrs_array_n2n,
+        yerr=[
+            corrs_array_n2n - ci_lower_array_n2n,
+            ci_upper_array_n2n - corrs_array_n2n,
+        ],
+        color='black', ecolor='black', capsize=5,
+    )
 
     for idx in range(len(corrs_n2n)):
         if idx < 5:
@@ -684,7 +724,7 @@ if __name__ == '__main__':
     legend_elements = [
         Patch(facecolor='green', edgecolor='black', label='Similar RDMs'),
         Patch(facecolor='blue', edgecolor='black', label='Random RDMs'),
-        Patch(facecolor='red', edgecolor='black', label='Different RDMs')
+        Patch(facecolor='red', edgecolor='black', label='Different RDMs'),
     ]
     plt.xlabel('Pair Index')
     plt.ylabel('Correlation Coefficient')
@@ -692,4 +732,4 @@ if __name__ == '__main__':
     plt.legend(handles=legend_elements)
     plt.show()
 
-#%%
+# %%

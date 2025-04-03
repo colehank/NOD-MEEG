@@ -1,13 +1,19 @@
+from __future__ import annotations
+
 import os
-#%%
-from typing import List, Dict, Optional, Any
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import matplotlib.pyplot as plt
-from pyctf import dsopen
-from matplotlib.patches import Patch
 from matplotlib import font_manager as fm
+from matplotlib.patches import Patch
+from pyctf import dsopen
+# %%
 
 DATA_DIR = '../../NaturalObject/MEG/MEG-BIDS'
 RESULTS_DIR = '../../NOD-MEEG_results'
@@ -19,23 +25,25 @@ SESSIONS_CONFIG = {
         'ses-ImageNet01': 2,
         'ses-ImageNet02': 2,
         'ses-ImageNet03': 8,
-        'ses-ImageNet04': 8
+        'ses-ImageNet04': 8,
     },
     range(10, 31): {
-        'ses-ImageNet01': 5
-    }
+        'ses-ImageNet01': 5,
+    },
 }
 
-#%%
+# %%
+
+
 def analyze_head_movement(
     data_dir: str,
     results_dir: str,
     n_participants: int,
-    sessions_config: Dict[int, Dict[str, int]],
-    electrodes: List[str],
-    font_path: Optional[str] = None,
+    sessions_config: dict[int, dict[str, int]],
+    electrodes: list[str],
+    font_path: str | None = None,
     palette: str = 'Spectral',
-    fontsize: int = 12
+    fontsize: int = 12,
 ) -> None:
     """
     Analyze head movement by loading sensor positions, computing movements, and plotting results.
@@ -76,7 +84,9 @@ def analyze_head_movement(
     # Set font and plot styles
     if font_path:
         fm.fontManager.addfont(font_path)
-        plt.rcParams['font.family'] = fm.FontProperties(fname=font_path).get_name()
+        plt.rcParams['font.family'] = fm.FontProperties(
+            fname=font_path,
+        ).get_name()
 
     # Constants and settings
     palette_colors = sns.color_palette(palette=palette, n_colors=10)
@@ -87,7 +97,7 @@ def analyze_head_movement(
         root_dir=data_dir,
         n_participants=n_participants,
         sessions_config=sessions_config,
-        electrodes=electrodes
+        electrodes=electrodes,
     )
     sensor_data = data_loader.load_sensor_positions()
     os.makedirs(f'{results_dir}/data', exist_ok=True)
@@ -100,11 +110,12 @@ def analyze_head_movement(
         n_participants=n_participants,
         results_dir=results_dir,
         colors=colors,
-        fontsize=fontsize
+        fontsize=fontsize,
     )
     analyzer.compute_head_movement()
     analyzer.plot_head_motion()
     analyzer.print_motion_statistics()
+
 
 class SensorDataLoader:
     """
@@ -141,8 +152,8 @@ class SensorDataLoader:
         self,
         root_dir: str,
         n_participants: int,
-        sessions_config: Dict[int, Dict[str, int]],
-        electrodes: List[str]
+        sessions_config: dict[int, dict[str, int]],
+        electrodes: list[str],
     ) -> None:
         self.root_dir = root_dir
         self.n_participants = n_participants
@@ -162,7 +173,7 @@ class SensorDataLoader:
         pd.DataFrame
             DataFrame containing sensor positions for all runs.
         """
-        all_rows: List[Dict[str, Any]] = []
+        all_rows: list[dict[str, Any]] = []
         for subjects in range(1, self.n_participants + 1):
             participant_sessions = self._get_participant_sessions(subjects)
             for session, n_runs in participant_sessions.items():
@@ -173,7 +184,7 @@ class SensorDataLoader:
         self.data = pd.DataFrame(all_rows, columns=self.columns)
         return self.data
 
-    def _get_participant_sessions(self, subjects: int) -> Dict[str, int]:
+    def _get_participant_sessions(self, subjects: int) -> dict[str, int]:
         """
         Get the session configuration for a subjects.
 
@@ -196,8 +207,8 @@ class SensorDataLoader:
         self,
         subjects: int,
         session: str,
-        run: int
-    ) -> Optional[Dict[str, Any]]:
+        run: int,
+    ) -> dict[str, Any] | None:
         """
         Load sensor positions for a single run.
 
@@ -222,7 +233,7 @@ class SensorDataLoader:
         )
         if os.path.exists(meg_fn):
             ds = dsopen(meg_fn)
-            row: Dict[str, Any] = {
+            row: dict[str, Any] = {
                 'subjects': subjects,
                 'session': session,
                 'run': run,
@@ -237,6 +248,7 @@ class SensorDataLoader:
         else:
             print(f"File not found: {meg_fn}")
             return None
+
 
 class HeadMovementAnalyzer:
     """
@@ -278,11 +290,11 @@ class HeadMovementAnalyzer:
     def __init__(
         self,
         sensor_data: pd.DataFrame,
-        electrodes: List[str],
+        electrodes: list[str],
         n_participants: int,
         results_dir: str,
-        colors: List[Any],
-        fontsize: int
+        colors: list[Any],
+        fontsize: int,
     ) -> None:
         self.sensor_data = sensor_data
         self.head_motion = pd.DataFrame()
@@ -295,7 +307,7 @@ class HeadMovementAnalyzer:
     @staticmethod
     def calculate_distance(
         coord1: np.ndarray,
-        coord2: np.ndarray
+        coord2: np.ndarray,
     ) -> float:
         """
         Calculate Euclidean distance between two 3D coordinates.
@@ -324,17 +336,25 @@ class HeadMovementAnalyzer:
             DataFrame containing head movement data.
         """
         participants = self.sensor_data['subjects'].unique()
-        motion_records: List[Dict[str, Any]] = []
+        motion_records: list[dict[str, Any]] = []
 
         for subjects in participants:
             participant_data = self.sensor_data[self.sensor_data['subjects'] == subjects]
             sessions = participant_data['session'].unique()
 
             # Within-session head movement
-            motion_records.extend(self._compute_within_session_movement(participant_data, subjects))
+            motion_records.extend(
+                self._compute_within_session_movement(
+                    participant_data, subjects,
+                ),
+            )
 
             # Between-session head movement
-            motion_records.extend(self._compute_between_session_movement(participant_data, subjects, sessions))
+            motion_records.extend(
+                self._compute_between_session_movement(
+                    participant_data, subjects, sessions,
+                ),
+            )
 
         self.head_motion = pd.DataFrame(motion_records)
         return self.head_motion
@@ -342,8 +362,8 @@ class HeadMovementAnalyzer:
     def _compute_within_session_movement(
         self,
         participant_data: pd.DataFrame,
-        subjects: int
-    ) -> List[Dict[str, Any]]:
+        subjects: int,
+    ) -> list[dict[str, Any]]:
         """
         Compute within-session head movement for a subjects.
 
@@ -359,7 +379,7 @@ class HeadMovementAnalyzer:
         List[Dict[str, Any]]
             List of dictionaries containing within-session motion records.
         """
-        motion_records: List[Dict[str, Any]] = []
+        motion_records: list[dict[str, Any]] = []
         sessions = participant_data['session'].unique()
         for session in sessions:
             session_data = participant_data[participant_data['session'] == session]
@@ -373,7 +393,7 @@ class HeadMovementAnalyzer:
                     'session': session,
                     'run': runs[i + 1],
                     'motion': avg_motion,
-                    'type': 'within-session'
+                    'type': 'within-session',
                 })
         return motion_records
 
@@ -381,8 +401,8 @@ class HeadMovementAnalyzer:
         self,
         participant_data: pd.DataFrame,
         subjects: int,
-        sessions: np.ndarray
-    ) -> List[Dict[str, Any]]:
+        sessions: np.ndarray,
+    ) -> list[dict[str, Any]]:
         """
         Compute between-session head movement for a subjects.
 
@@ -400,7 +420,7 @@ class HeadMovementAnalyzer:
         List[Dict[str, Any]]
             List of dictionaries containing between-session motion records.
         """
-        motion_records: List[Dict[str, Any]] = []
+        motion_records: list[dict[str, Any]] = []
         if len(sessions) > 1:
             for i in range(len(sessions) - 1):
                 session1 = sessions[i]
@@ -412,7 +432,9 @@ class HeadMovementAnalyzer:
 
                 for idx1, run1 in enumerate(data1['run']):
                     for idx2, run2 in enumerate(data2['run']):
-                        avg_motion = self._compute_average_motion(coords1, idx1, idx2=idx2, coords2=coords2)
+                        avg_motion = self._compute_average_motion(
+                            coords1, idx1, idx2=idx2, coords2=coords2,
+                        )
                         motion_records.append({
                             'subjects': subjects,
                             'session1': session1,
@@ -420,13 +442,13 @@ class HeadMovementAnalyzer:
                             'run1': run1,
                             'run2': run2,
                             'motion': avg_motion,
-                            'type': 'between-session'
+                            'type': 'between-session',
                         })
         return motion_records
 
     def _extract_coordinates(
         self,
-        data: pd.DataFrame
+        data: pd.DataFrame,
     ) -> np.ndarray:
         """
         Extract coordinates for electrodes from the data.
@@ -441,15 +463,17 @@ class HeadMovementAnalyzer:
         np.ndarray
             Numpy array of shape (n_runs, n_electrodes, 3) containing coordinates.
         """
-        coord_columns = [f"{elec}_{axis}" for elec in self.electrodes for axis in ['x', 'y', 'z']]
+        coord_columns = [
+            f"{elec}_{axis}" for elec in self.electrodes for axis in ['x', 'y', 'z']
+        ]
         return data[coord_columns].values.reshape(-1, len(self.electrodes), 3)
 
     def _compute_average_motion(
         self,
         coords1: np.ndarray,
         idx1: int,
-        idx2: Optional[int] = None,
-        coords2: Optional[np.ndarray] = None
+        idx2: int | None = None,
+        coords2: np.ndarray | None = None,
     ) -> float:
         """
         Compute average motion between two sets of coordinates.
@@ -490,24 +514,29 @@ class HeadMovementAnalyzer:
         fig, ax = plt.subplots(figsize=(6, 3), dpi=300)
         sns.violinplot(
             data=self.head_motion,
-            x="subjects", y="motion", hue="type",
-            inner='point', inner_kws={"s": 0.5, "color": "grey", 'alpha': 0.4},
+            x='subjects', y='motion', hue='type',
+            inner='point', inner_kws={'s': 0.5, 'color': 'grey', 'alpha': 0.4},
             ax=ax, native_scale=True,
             linewidth=0, density_norm='width',
-            palette=self.colors, legend=False
+            palette=self.colors, legend=False,
         )
         ax.spines['right'].set_visible(False)
         ax.spines['top'].set_visible(False)
         ax.set_xlabel('Subjects', fontsize=self.fontsize)
         ax.set_ylabel('Head Motion (mm)', fontsize=self.fontsize)
         ax.set_xticks(np.arange(1, self.n_participants + 1))
-        ax.legend(handles=[
-            Patch(color=self.colors[1], label='Between Session'),
-            Patch(color=self.colors[0], label='Within Session')
-        ], loc='upper right')
+        ax.legend(
+            handles=[
+                Patch(color=self.colors[1], label='Between Session'),
+                Patch(color=self.colors[0], label='Within Session'),
+            ], loc='upper right',
+        )
         plt.tight_layout()
         os.makedirs(f'{self.results_dir}/figs', exist_ok=True)
-        plt.savefig(f'{self.results_dir}/figs/head_motion.svg', dpi=600, bbox_inches='tight')
+        plt.savefig(
+            f'{self.results_dir}/figs/head_motion.svg',
+            dpi=600, bbox_inches='tight',
+        )
         plt.show()
 
     def print_motion_statistics(self) -> None:
@@ -519,21 +548,32 @@ class HeadMovementAnalyzer:
         None
             The function prints the statistics to the console.
         """
-        within_motion = self.head_motion[self.head_motion['type'] == 'within-session']
-        between_motion = self.head_motion[self.head_motion['type'] == 'between-session']
+        within_motion = self.head_motion[
+            self.head_motion['type']
+            == 'within-session'
+        ]
+        between_motion = self.head_motion[
+            self.head_motion['type']
+            == 'between-session'
+        ]
 
-        within_median = within_motion.groupby('subjects')['motion'].mean().median()
-        between_median = between_motion.groupby('subjects')['motion'].mean().median()
+        within_median = within_motion.groupby(
+            'subjects',
+        )['motion'].mean().median()
+        between_median = between_motion.groupby(
+            'subjects',
+        )['motion'].mean().median()
 
         print(f'Within-session median: {within_median:.3f} mm')
         print(f'Between-session median: {between_median:.3f} mm')
 
-#%% 
+
+# %%
 analyze_head_movement(
     data_dir=DATA_DIR,
     results_dir=RESULTS_DIR,
     n_participants=N_PARTICIPANTS,
     sessions_config=SESSIONS_CONFIG,
     electrodes=ELECTRODES,
-    font_path=FONT_PATH
+    font_path=FONT_PATH,
 )
