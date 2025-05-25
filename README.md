@@ -1,7 +1,5 @@
 # A large-scale MEG and EEG dataset for object recognition in naturalistic scenes
-This repository provides the codebase for the preprocessing, validation, and visualization associated with the NOD-MEEG
-
-Zhang, G., Zhou, M., Zhen, S. et al. A large-scale MEG and EEG dataset for object recognition in naturalistic scenes. Sci Data 12, 857 (2025). https://doi.org/10.1038/s41597-025-05174-7
+This repository provides the codebase for the preprocessing, validation, and visualization associated with the [A large-scale MEG and EEG dataset for object recognition in naturalistic scenes](https://doi.org/10.1038/s41597-025-05174-7)
 
 ## Repository Structure
 
