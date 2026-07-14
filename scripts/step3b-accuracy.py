@@ -10,8 +10,10 @@ import pandas as pd
 import seaborn as sns
 
 ROOT = '../../NOD-MEEG_upload'
-EEG_ROOT = op.join(ROOT, 'NOD-EEG', 'events')
-MEG_ROOT = op.join(ROOT, 'NOD-MEG', 'events')
+# Per-subject ``sub-XX_events.csv`` files; published on OpenNeuro under
+# ``derivatives/detailed_events`` (MEG: ds005810, EEG: ds005811).
+EEG_ROOT = op.join(ROOT, 'NOD-EEG', 'derivatives', 'detailed_events')
+MEG_ROOT = op.join(ROOT, 'NOD-MEG', 'derivatives', 'detailed_events')
 
 SAVE_DIR = '../../NOD-MEEG_results'
 FIG_DIR = f'{SAVE_DIR}/figs'
