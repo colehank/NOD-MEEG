@@ -16,17 +16,22 @@ sys.path.append(op.abspath('..'))
 # %%
 ROOT = '../../NOD-MEEG_upload'
 
+# NOTE: the event roots point to the per-subject ``sub-XX_events.csv`` files.
+# On OpenNeuro (MEG: ds005810, EEG: ds005811) these are published under
+# ``derivatives/detailed_events``. The BIDS ``*_events.tsv`` files do NOT carry
+# the image_id / response / class metadata that epoching relies on, so the
+# detailed_events CSVs are required here.
 MEG_ROOT, MEG_EVENT_ROOT, MEG_SAVE_ROOT = (
     f'{ROOT}/NOD-MEG/{path}' for path in [
         'derivatives/preprocessed/raw',
-        'events',
+        'derivatives/detailed_events',
         'derivatives/preprocessed/epochs',
     ]
 )
 EEG_ROOT, EEG_EVENT_ROOT, EEG_SAVE_ROOT = (
     f'{ROOT}/NOD-EEG/{path}' for path in [
         'derivatives/preprocessed/raw',
-        'events',
+        'derivatives/detailed_events',
         'derivatives/preprocessed/epochs',
     ]
 )
